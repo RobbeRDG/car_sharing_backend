@@ -5,16 +5,11 @@ spring:
   application:
     name: API-GATEWAY
   cloud:
-    gateway:
-      routes:
-        - id: AUTHENTICATION-SERVICE
-          uri: lb://AUTHENTICATION-SERVICE
-          predicates:
-            - Path=/auth/**
-        - id: USER-SERVICE
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/users/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
 
 eureka:
   client:
@@ -24,3 +19,6 @@ eureka:
       default-zone: http://localhost:8761/eureka/
     instance:
       hostname: localhost
+
+auth0:
+  audience: https://bachelorproject/api
