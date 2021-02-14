@@ -5,6 +5,9 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+/**
+ * Validates that the JWT token contains the intended audience in its claims.
+ */
 class AudienceValidator implements OAuth2TokenValidator<Jwt> {
     private final String audience;
 
@@ -18,6 +21,7 @@ class AudienceValidator implements OAuth2TokenValidator<Jwt> {
         if (jwt.getAudience().contains(audience)) {
             return OAuth2TokenValidatorResult.success();
         }
+
         return OAuth2TokenValidatorResult.failure(error);
     }
 }
