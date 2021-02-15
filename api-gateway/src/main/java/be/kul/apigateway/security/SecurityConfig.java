@@ -29,7 +29,7 @@ public class SecurityConfig {
         an OAuth2 Resource Server, using JWT validation.
         */
         http.authorizeExchange()
-                //.pathMatchers("/users").hasRole()
+                .pathMatchers("/users").hasAuthority("SCOPE_read:messages")
                 .anyExchange().authenticated()
                 .and()
                 .oauth2ResourceServer()
