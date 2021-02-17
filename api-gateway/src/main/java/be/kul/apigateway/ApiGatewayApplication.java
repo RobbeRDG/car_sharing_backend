@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import java.time.Duration;
 
 @SpringBootApplication
+@EnableEurekaClient
 public class ApiGatewayApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ApiGatewayApplication.class, args);
