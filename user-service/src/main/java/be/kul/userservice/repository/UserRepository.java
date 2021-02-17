@@ -1,6 +1,5 @@
 package be.kul.userservice.repository;
 
-import be.kul.userservice.object.User;
 import org.springframework.data.repository.CrudRepository;
 
 // This will be AUTO IMPLEMENTED by Spring into a Bean called userRepository

@@ -10,7 +10,7 @@ public class RoutingConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("USER-SERVICE", r -> r.path("/users")
+                .route("USER-SERVICE", r -> r.path("/users/**")
                         .uri("lb://USER-SERVICE"))
                 .build();
     }
