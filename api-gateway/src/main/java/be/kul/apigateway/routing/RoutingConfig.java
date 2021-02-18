@@ -12,6 +12,14 @@ public class RoutingConfig {
         return builder.routes()
                 .route("USER-SERVICE", r -> r.path("/users/**")
                         .uri("lb://USER-SERVICE"))
+                .route("CAR-SERVICE", r -> r.path("/cars/**")
+                        .uri("lb://CAR-SERVICE"))
+                .route("CAR-LOG-SERVICE", r -> r.path("/car_logs/**")
+                        .uri("lb://CAR-LOG-SERVICE"))
+                .route("RIDE-SERVICE", r -> r.path("/rides/**")
+                        .uri("lb://RIDE-SERVICE"))
+                .route("BILLING-SERVICE", r -> r.path("/billing/**")
+                        .uri("lb://BILLING-SERVICE"))
                 .build();
     }
 }
