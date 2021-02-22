@@ -14,7 +14,8 @@ import org.springframework.security.oauth2.jwt.*;
 /**
  * Configures our application with Spring Security to restrict access to our API endpoints.
  */
-public class SecurityConfig {
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value( "${auth0.audience}" )
     private String audience;
@@ -22,22 +23,21 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuer;
 
-    @Bean
-    public void configure(ServerHttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         /*
         This is where we configure the security required for our endpoints and setup our app to serve as
         an OAuth2 Resource Server, using JWT validation.
         */
-        http.authorizeExchange()
-                .pathMatchers("/users/**").hasAuthority("SCOPE_users")
-                .pathMatchers("/cars/**").hasAuthority("SCOPE_cars")
-                .pathMatchers("/car_logs/**").hasAuthority("SCOPE_car_logs")
-                .pathMatchers("/rides/**").hasAuthority("SCOPE_rides")
-                .pathMatchers("/billing/**").hasAuthority("SCOPE_billing")
-                .anyExchange().authenticated()
-                .and()
-                .oauth2ResourceServer()
-                .jwt();
+        http.authorizeRequests()
+                .antMatchers("/users/**").hasAuthority("SCOPE_user_service")
+                .antMatchers("/cars/**").hasAuthority("SCOPE_car_service")
+                .antMatchers("/car_logs/**").hasAuthority("SCOPE_car_log_service")
+                .antMatchers("/rides/**").hasAuthority("SCOPE_ride_service")
+                .antMatchers("/billing/**").hasAuthority("SCOPE_billing_service")
+                .anyRequest().authenticated()
+                .and().cors()
+                .and().oauth2ResourceServer().jwt();
     }
 
     @Bean
