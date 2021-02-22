@@ -8,8 +8,6 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # Replace with the domain of your Auth0 tenant.
-          # Note the trailing slash is important!
           issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
 
 eureka:

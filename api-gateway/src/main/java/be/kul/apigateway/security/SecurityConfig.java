@@ -14,16 +14,14 @@ import org.springframework.security.oauth2.jwt.*;
 /**
  * Configures our application with Spring Security to restrict access to our API endpoints.
  */
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
+public class SecurityConfig{
     @Value( "${auth0.audience}" )
     private String audience;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuer;
 
-    @Override
+    @Bean
     protected void configure(HttpSecurity http) throws Exception {
         /*
         This is where we configure the security required for our endpoints and setup our app to serve as
