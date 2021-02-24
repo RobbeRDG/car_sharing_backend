@@ -11,5 +11,5 @@ import java.util.UUID;
 // CRUD refers Create, Read, Update, Delete
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, String> {
 }

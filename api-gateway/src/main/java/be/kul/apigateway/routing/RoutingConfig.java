@@ -6,14 +6,13 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 
 @Configuration
 public class RoutingConfig {
-    @Autowired
-    private TokenRelayGatewayFilterFactory filterFactory;
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder, TokenRelayGatewayFilterFactory filterFactory) {
         return builder.routes()
                 .route("USER-SERVICE", r -> r.path("/users/**")
                         .filters(f -> f.filter(filterFactory.apply()))

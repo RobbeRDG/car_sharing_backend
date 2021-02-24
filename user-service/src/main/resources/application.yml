@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: USER-SERVICE
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
 
 eureka:
   client:

@@ -2,14 +2,15 @@ package be.kul.userservice.controller;
 
 import be.kul.userservice.entity.User;
 import be.kul.userservice.service.UserService;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path="/users")
@@ -20,15 +21,24 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(path="/registerUser")
-    public @ResponseBody User registerUser (@RequestBody User user){
-        log.info("User registered with id" + user.getId());
+    @PostMapping(path="/")
+    public @ResponseBody User registerUser (@AuthenticationPrincipal Jwt principal, @RequestBody User user){
+        String userId = principal.getClaimAsString("sub");
+        user.setId(userId);
+
         return userService.registerUser(user);
     }
 
+    @GetMapping(path="/")
+    public @ResponseBody
+    Optional<User> getUserById (@AuthenticationPrincipal Jwt principal){
+        String userId = principal.getClaimAsString("sub");
+        return userService.getUserById(userId);
+    }
 
-    @RequestMapping(path="/test")
-    public @ResponseBody String test() {
-        public String resource(@AuthenticationPrincipal Jwt jwt) {
+
+    @RequestMapping(path="/getId")
+    public String test(@AuthenticationPrincipal Jwt principal) {
+        return principal.getClaimAsString("sub");
     }
 }
