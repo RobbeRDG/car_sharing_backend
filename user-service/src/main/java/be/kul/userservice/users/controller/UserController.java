@@ -14,31 +14,43 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path="/user-service")
 public class UserController {
-    //logger setup
-    Logger log = LoggerFactory.getLogger(UserController.class);
-
     @Autowired
     private UserService userService;
 
     @PostMapping(path="/users")
-    public @ResponseBody
-    User registerUser (@AuthenticationPrincipal Jwt principal, @RequestBody User user){
+    public @ResponseBody User registerUser (@AuthenticationPrincipal Jwt principal, @RequestBody User user){
         String userId = principal.getClaimAsString("sub");
         user.setId(userId);
 
         return userService.registerUser(user);
     }
 
-    @GetMapping(path="/users")
-    public @ResponseBody
-    Optional<User> getUserById (@AuthenticationPrincipal Jwt principal){
+    @PutMapping(path="/users")
+    public @ResponseBody User updateUser (@AuthenticationPrincipal Jwt principal, @RequestBody User user){
         String userId = principal.getClaimAsString("sub");
+        user.setId(userId);
+
+        return userService.updateUser(user);
+    }
+
+    @GetMapping(path="/users")
+    public @ResponseBody User getUserByToken (@AuthenticationPrincipal Jwt principal, @RequestBody User user){
+        String userId = principal.getClaimAsString("sub");
+        user.setId(userId);
+
+        return userService.updateUser(user);
+    }
+
+    @GetMapping(path="/users/{id}")
+    public @ResponseBody Optional<User> getUserById (@AuthenticationPrincipal Jwt principal, @PathVariable("id") String id){
+        String userId = principal.getClaimAsString("sub");
+
         return userService.getUserById(userId);
     }
 
 
     @RequestMapping(path="/users/get-id")
-    public String test(@AuthenticationPrincipal Jwt principal) {
+    public @ResponseBody String test(@AuthenticationPrincipal Jwt principal) {
         return principal.getClaimAsString("sub");
     }
 }

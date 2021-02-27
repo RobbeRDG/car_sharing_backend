@@ -23,4 +23,8 @@ public class UserService {
     public boolean existsUser(String userId) {
         return userRepository.existsById(userId);
     }
+
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
 }

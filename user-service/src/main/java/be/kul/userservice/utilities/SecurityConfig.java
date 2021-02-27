@@ -1,4 +1,4 @@
-package be.kul.userservice.security;
+package be.kul.userservice.utilities;
 
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +20,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests(authorizeRequests -> authorizeRequests
                                 .mvcMatchers("/**").hasAuthority("SCOPE_user:service")
+                                .mvcMatchers("/user-service/users/{id}").hasAuthority("SCOPE_user:service:get_user_by_id")
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
