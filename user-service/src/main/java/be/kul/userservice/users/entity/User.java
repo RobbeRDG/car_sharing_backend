@@ -1,10 +1,8 @@
-package be.kul.userservice.entity;
+package be.kul.userservice.users.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -13,7 +11,6 @@ import javax.persistence.Id;
 @NoArgsConstructor
 public class User {
     @Id
-    @Column(nullable = false)
     private String id;
 
     public String getId() {

@@ -1,7 +1,7 @@
-package be.kul.userservice.service;
+package be.kul.userservice.users.service;
 
-import be.kul.userservice.entity.User;
-import be.kul.userservice.repository.UserRepository;
+import be.kul.userservice.users.entity.User;
+import be.kul.userservice.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
