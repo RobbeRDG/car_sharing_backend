@@ -1,0 +1,202 @@
+[
+    {
+        "numberOfSeats": 4,
+        "color": "#ffffff",
+        "manufacturer": "Peugeot",
+        "model": "208",
+        "yearOfManufacture": "2013",
+        "numberPlate": "1-KVF-126",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 441,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.67315,
+                51.01656
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#000000",
+        "manufacturer": "Peugeot",
+        "model": "208",
+        "yearOfManufacture": "2013",
+        "numberPlate": "1-HKS-323",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 213,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.72456,
+                51.02931
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#cc1010",
+        "manufacturer": "Peugeot",
+        "model": "208",
+        "yearOfManufacture": "2013",
+        "numberPlate": "1-JJL-421",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 416,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.75519,
+                51.04405
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#ffffff",
+        "manufacturer": "Opel",
+        "model": "Corsa",
+        "yearOfManufacture": "2018",
+        "numberPlate": "1-LMP-478",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 132,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.71403,
+                51.07938
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#000000",
+        "manufacturer": "Opel",
+        "model": "Corsa",
+        "yearOfManufacture": "2018",
+        "numberPlate": "1-KMP-333",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 601,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.67894,
+                51.07023
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#cc1010",
+        "manufacturer": "Opel",
+        "model": "Corsa",
+        "yearOfManufacture": "2018",
+        "numberPlate": "1-TLS-456",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 81,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.75071,
+                51.05725
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#ffffff",
+        "manufacturer": "Opel",
+        "model": "Corsa",
+        "yearOfManufacture": "2018",
+        "numberPlate": "1-APJ-321",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 423,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.76626,
+                51.03380
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#1026b5",
+        "manufacturer": "Volkswagen",
+        "model": "Polo",
+        "yearOfManufacture": "2020",
+        "numberPlate": "1-JCV-738",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 168,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.73308,
+                51.05282
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#ffffff",
+        "manufacturer": "Volkswagen",
+        "model": "Polo",
+        "yearOfManufacture": "2020",
+        "numberPlate": "1-DCE-568",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 523,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.73474,
+                51.04916
+            ]
+        }
+    },
+    {
+        "numberOfSeats": 4,
+        "color": "#1026b5",
+        "manufacturer": "Volkswagen",
+        "model": "Polo",
+        "yearOfManufacture": "2020",
+        "numberPlate": "1-PLA-911",
+        "available": true,
+        "reserved": false,
+        "inUse": false,
+        "damaged": false,
+        "remainingFuelInKilometers": 580,
+        "location": {
+            "type": "Point",
+            "coordinates": [
+                3.69927,
+                51.08510
+            ]
+        }
+    }
+]
