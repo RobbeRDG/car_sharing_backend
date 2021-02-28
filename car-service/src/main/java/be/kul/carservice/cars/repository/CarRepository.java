@@ -12,13 +12,9 @@ import java.util.UUID;
 @Repository
 public interface CarRepository extends JpaRepository<Car, UUID> {
 
-    @Query(value =
-            "SELECT * "
-            + "FROM car AS c "
-            + "WHERE ST_Distance(c.location, ST_SRID(POINT(:userLongitude, :userLatitude), 4326)) < (:radiusInKM * 1000) "
-            + "ORDER BY ST_Distance(c.location, ST_SRID(POINT(:userLongitude, :userLatitude), 4326))"
+    @Query(value = "SELECT * FROM car AS c WHERE ST_Distance(c.location, ST_SRID(POINT(:userLongitude, :userLatitude), 4326)) < (:radiusInKM * 1000) ORDER BY ST_Distance(c.location, ST_SRID(POINT( :userLongitude, :userLatitude ), 4326))"
             , nativeQuery = true)
-    List<Car> findAllCarsWithinRadius(@Param("userLongitude") Double userLongitude, @Param("userLatitude") Double userLatitude, @Param("radiusInKM") double radiusInKM);
+    List<Car> findAllCarsWithinRadius(@Param("userLongitude") double userLongitude, @Param("userLatitude") double userLatitude, @Param("radiusInKM") double radiusInKM);
 
     boolean existsByNumberPlate(String numberPlate);
 }

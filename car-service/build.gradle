@@ -28,7 +28,7 @@ dependencies {
 	implementation 'org.n52.jackson:jackson-datatype-jts:1.2.8'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	implementation 'org.mariadb.jdbc:mariadb-java-client:2.2.0'
+	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
