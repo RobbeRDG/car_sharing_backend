@@ -25,10 +25,9 @@ public class CarService {
     public Car registerCar(Car car) {
         //First check if the car doesn't already exist
         if (carRepository.existsByNumberPlate(car.getNumberPlate())) {
-            logger.error("Car with numberplate '" + car.getNumberPlate() + "' already exists");
-            throw new AlreadyExistsException(
-                    "Car with numberplate '" + car.getNumberPlate() + "' already exists"
-            );
+            String errorMessage = "Car with numberplate '" + car.getNumberPlate() + "' already exists";
+            logger.warn(errorMessage);
+            throw new AlreadyExistsException(errorMessage);
         }
 
         logger.info("Car with numberplate '" +car.getNumberPlate() + "' created");
@@ -41,15 +40,21 @@ public class CarService {
 
     public List<Car> registerCars(List<Car> carList) {
         //First check if any of the cars don't already exist
+        StringBuilder errorMessage = new StringBuilder("Car(s) with numberplate: ");
+        boolean error = false;
         for(Car car: carList) {
             if (carRepository.existsByNumberPlate(car.getNumberPlate())) {
-                logger.error("Car with numberplate '" + car.getNumberPlate() + "' already exists");
-                throw new AlreadyExistsException(
-                        "Car with numberplate '" + car.getNumberPlate() + "' already exists"
-                );
+                error = true;
+                errorMessage.append(" '" + car.getNumberPlate() + "' ");
             }
         }
+        errorMessage.append("Already exist");
+        if (error) {
+            logger.warn(errorMessage.toString());
+            throw new AlreadyExistsException(errorMessage.toString());
+        }
 
+        logger.info("Cars created");
         return carRepository.saveAll(carList);
     }
 }

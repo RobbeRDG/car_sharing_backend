@@ -9,9 +9,9 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:mysql://localhost/cars?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mariadb://192.168.1.185/cars?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: car_service
-    password: tbxDqdjSm9
+    password: E2qhvd&S%H^jRzt24Vfptq*!2
   security:
     oauth2:
       resourceserver:
