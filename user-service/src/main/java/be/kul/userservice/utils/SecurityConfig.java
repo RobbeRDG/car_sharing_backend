@@ -1,4 +1,4 @@
-package be.kul.userservice.utilities;
+package be.kul.userservice.utils;
 
 
 import org.springframework.beans.factory.annotation.Value;
