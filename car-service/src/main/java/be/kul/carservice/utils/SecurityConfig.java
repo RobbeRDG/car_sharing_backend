@@ -1,4 +1,4 @@
-package be.kul.carservice.security;
+package be.kul.carservice.utils;
 
 
 import org.springframework.http.HttpMethod;
@@ -14,11 +14,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/**").hasAuthority("SCOPE_car:service")
                 .antMatchers(HttpMethod.POST, "/car-service/cars").hasAuthority("SCOPE_car:service:add_car")
                 .antMatchers(HttpMethod.POST, "/car-service/cars/batch").hasAuthority("SCOPE_car:service:add_car")
+                .antMatchers("/**").hasAuthority("SCOPE_car:service")
                 .anyRequest().authenticated()
-                .and().oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                .and().oauth2ResourceServer().jwt();
     }
 
 }
