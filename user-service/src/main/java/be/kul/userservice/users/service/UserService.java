@@ -29,8 +29,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> getUserById(String userId) {
-        return userRepository.findById(userId);
+    public User getUserById(String userId) {
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user == null) {
+            logger.warn("User with id: '" + userId + "' doesn't exists");
+            throw new DoesntExistException(
+                    "User with id: '" + userId + "'doesn't exist"
+            );
+        }
+
+        return user;
     }
 
     public boolean existsUser(String userId) {

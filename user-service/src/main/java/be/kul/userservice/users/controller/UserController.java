@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping(path="/users")
-    public @ResponseBody Optional<User> getUserByToken (@AuthenticationPrincipal Jwt principal){
+    public @ResponseBody User getUserByToken (@AuthenticationPrincipal Jwt principal){
         String userId = principal.getClaimAsString("sub");
 
         return userService.getUserById(userId);
