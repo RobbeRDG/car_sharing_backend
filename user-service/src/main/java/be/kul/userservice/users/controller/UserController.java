@@ -2,8 +2,6 @@ package be.kul.userservice.users.controller;
 
 import be.kul.userservice.users.entity.User;
 import be.kul.userservice.users.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -34,15 +32,7 @@ public class UserController {
     }
 
     @GetMapping(path="/users")
-    public @ResponseBody User getUserByToken (@AuthenticationPrincipal Jwt principal, @RequestBody User user){
-        String userId = principal.getClaimAsString("sub");
-        user.setId(userId);
-
-        return userService.updateUser(user);
-    }
-
-    @GetMapping(path="/users/{id}")
-    public @ResponseBody Optional<User> getUserById (@AuthenticationPrincipal Jwt principal, @PathVariable("id") String id){
+    public @ResponseBody Optional<User> getUserByToken (@AuthenticationPrincipal Jwt principal){
         String userId = principal.getClaimAsString("sub");
 
         return userService.getUserById(userId);

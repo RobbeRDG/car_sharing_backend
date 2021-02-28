@@ -18,12 +18,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(authorizeRequests -> authorizeRequests
-                                .mvcMatchers("/**").hasAuthority("SCOPE_user:service")
-                                .mvcMatchers("/user-service/users/{id}").hasAuthority("SCOPE_user:service:get_user_by_id")
-                                .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                .authorizeRequests()
+                .antMatchers("/**").hasAuthority("SCOPE_user:service")
+                .anyRequest().authenticated()
+                .and().oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
     }
 
 }

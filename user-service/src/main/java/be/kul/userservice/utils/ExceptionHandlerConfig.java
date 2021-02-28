@@ -1,6 +1,7 @@
-package be.kul.userservice.utilities;
+package be.kul.userservice.utils;
 
-import be.kul.userservice.utilities.exceptions.ForbiddenException;
+import be.kul.userservice.utils.exceptions.AlreadyExistsException;
+import be.kul.userservice.utils.exceptions.DoesntExistException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +12,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
-
-    @ExceptionHandler(value = {ForbiddenException.class})
-    public ResponseEntity<Object> handleForbiddenException(ForbiddenException ex, WebRequest request) {
+    @ExceptionHandler(value = {
+            AlreadyExistsException.class,
+            DoesntExistException.class
+    })
+    protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
         return handleExceptionInternal(ex, bodyOfResponse,
-                new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 }
