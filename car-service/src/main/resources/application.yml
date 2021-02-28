@@ -1,0 +1,29 @@
+server:
+  port: 9002
+
+spring:
+  application:
+    name: CAR-SERVICE
+  jpa:
+    database-platform: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:mysql://localhost/cars?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: car_service
+    password: tbxDqdjSm9
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+    instance:
+      hostname: localhost
+
