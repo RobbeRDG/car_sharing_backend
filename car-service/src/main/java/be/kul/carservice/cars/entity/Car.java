@@ -17,13 +17,12 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Car {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private UUID carId;
+    @GeneratedValue
+    private long carId;
 
     //Car information
     @NotNull
@@ -48,7 +47,7 @@ public class Car {
     @NotNull
     private boolean inUse;
     @NotNull
-    private boolean damaged;
+    private boolean needsMaintenance;
     @NotNull
     private int remainingFuelInKilometers;
     @NotNull
@@ -58,5 +57,13 @@ public class Car {
 
     public String getNumberPlate() {
         return numberPlate;
+    }
+
+    public void setRemainingFuelInKilometers(int remainingFuelInKilometers) {
+        this.remainingFuelInKilometers = remainingFuelInKilometers;
+    }
+
+    public void setLocation(Point location) {
+        this.location = location;
     }
 }

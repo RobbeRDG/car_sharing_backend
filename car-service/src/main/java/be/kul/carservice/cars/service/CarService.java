@@ -3,6 +3,8 @@ package be.kul.carservice.cars.service;
 import be.kul.carservice.cars.entity.Car;
 import be.kul.carservice.cars.repository.CarRepository;
 import be.kul.carservice.utils.exceptions.AlreadyExistsException;
+import be.kul.carservice.utils.exceptions.DoesntExistException;
+import be.kul.carservice.utils.jsonObjects.CarStateUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +58,25 @@ public class CarService {
 
         logger.info("Cars created");
         return carRepository.saveAll(carList);
+    }
+
+    public List<Car> findAllAvailableCarsWithinRadius(double longitude, double latitude, double radiusInKM) {
+        return carRepository.findAllAvailableCarsWithinRadius(longitude, latitude, radiusInKM);
+    }
+
+    public List<Car> findAllMaintenanceRequiringCarsWithinRadius(double longitude, double latitude, double radiusInKM) {
+        return carRepository.findAllMaintenanceRequiringCarsWithinRadius(longitude, latitude, radiusInKM);
+    }
+
+
+    public Car updateCarState(long id, CarStateUpdate stateUpdate) {
+        Car car = carRepository.findById(id).orElse(null);
+        if (car==null) throw new DoesntExistException("The car with id " + id + " doesn't exist");
+
+        //Update parameters
+        car.setRemainingFuelInKilometers(stateUpdate.getRemainingFuelInKilometers());
+        car.setLocation(stateUpdate.getLocation());
+
+        return carRepository.save(car);
     }
 }
