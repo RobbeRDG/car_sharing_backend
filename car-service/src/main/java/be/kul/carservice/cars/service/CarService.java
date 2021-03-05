@@ -74,6 +74,7 @@ public class CarService {
         if (car==null) throw new DoesntExistException("The car with id " + id + " doesn't exist");
 
         //Update parameters
+        logger.info("Updated car state of car with id " + id);
         car.setRemainingFuelInKilometers(stateUpdate.getRemainingFuelInKilometers());
         car.setLocation(stateUpdate.getLocation());
 
