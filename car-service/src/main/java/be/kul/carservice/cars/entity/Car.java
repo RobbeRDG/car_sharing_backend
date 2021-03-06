@@ -1,5 +1,6 @@
 package be.kul.carservice.cars.entity;
 
+import be.kul.carservice.reservations.entity.Reservation;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,8 @@ public class Car {
     @Id
     @GeneratedValue
     private long carId;
+    @Version
+    private long version;
 
     //Car information
     @NotNull
@@ -41,19 +44,21 @@ public class Car {
 
     //Car state
     @NotNull
-    private boolean available;
-    @NotNull
-    private boolean reserved;
-    @NotNull
     private boolean inUse;
     @NotNull
-    private boolean needsMaintenance;
+    private boolean inMaintenance;
     @NotNull
     private int remainingFuelInKilometers;
+
     @NotNull
     @JsonSerialize( using = GeometrySerializer.class)
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     private Point location;
+
+    @OneToOne
+    @JoinColumn(name = "reservation_id")
+    private Reservation latestReservation;
+
 
     public String getNumberPlate() {
         return numberPlate;
@@ -65,5 +70,22 @@ public class Car {
 
     public void setLocation(Point location) {
         this.location = location;
+    }
+
+
+    public boolean isInUse() {
+        return inUse;
+    }
+
+    public boolean isInMaintenance() {
+        return inMaintenance;
+    }
+
+    public Reservation getLatestReservation() {
+        return latestReservation;
+    }
+
+    public void setLatestReservation(Reservation latestReservation) {
+        this.latestReservation = latestReservation;
     }
 }

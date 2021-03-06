@@ -4,6 +4,8 @@ import be.kul.carservice.cars.entity.Car;
 import be.kul.carservice.cars.service.CarService;
 import be.kul.carservice.utils.jsonObjects.CarStateUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.PathParam;
@@ -39,12 +41,21 @@ public class CarController {
         return carService.findAllAvailableCarsWithinRadius(longitude, latitude, radiusInKM);
     }
 
-    @PutMapping("/cars/{id}")
+    @PutMapping("/cars/state/{id}")
     public @ResponseBody Car updateCarState(
             @RequestBody CarStateUpdate stateUpdate,
             @PathVariable long id
     ) {
         return carService.updateCarState(id, stateUpdate);
+    }
+
+    @PutMapping("/cars/reservation/{id}")
+    public @ResponseBody Car reserveCar(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long id
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return carService.reserveCar(userId, id);
     }
 
 }
