@@ -4,6 +4,7 @@ import be.kul.carservice.cars.service.CarService;
 import be.kul.carservice.utils.exceptions.AlreadyExistsException;
 import be.kul.carservice.utils.exceptions.DoesntExistException;
 import be.kul.carservice.utils.exceptions.NotAvailableException;
+import be.kul.carservice.utils.exceptions.ReservationCooldownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -25,7 +26,8 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             AlreadyExistsException.class,
             DoesntExistException.class,
-            NotAvailableException.class
+            NotAvailableException.class,
+            ReservationCooldownException.class
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();

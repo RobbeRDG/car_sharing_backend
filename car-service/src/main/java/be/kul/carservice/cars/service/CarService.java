@@ -30,7 +30,7 @@ import java.util.Set;
 public class CarService {
     Logger logger = LoggerFactory.getLogger(CarService.class);
 
-    private static final int reservationCooldownInMinutes = 1;
+    private static final int reservationCooldownInMinutes = 120;
 
     @Autowired
     private CarRepository carRepository;
