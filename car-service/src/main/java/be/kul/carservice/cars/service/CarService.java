@@ -3,6 +3,7 @@ package be.kul.carservice.cars.service;
 import be.kul.carservice.cars.entity.Car;
 import be.kul.carservice.cars.repository.CarRepository;
 import be.kul.carservice.reservations.entity.Reservation;
+import be.kul.carservice.reservations.repository.ReservationRepository;
 import be.kul.carservice.reservations.service.ReservationService;
 import be.kul.carservice.utils.exceptions.AlreadyExistsException;
 import be.kul.carservice.utils.exceptions.DoesntExistException;
@@ -37,6 +38,9 @@ public class CarService {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
 
     public Car registerCar(Car car) {
@@ -96,7 +100,7 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    @Transactional
+    @Transactional(dontRollbackOn = {NotAvailableException.class, DoesntExistException.class, ReservationCooldownException.class})
     public Car reserveCar(String userId, long id) {
         //Get the requested car
         Car car = carRepository.findById(id).orElse(null);
@@ -115,7 +119,9 @@ public class CarService {
 
         //Create a new reservation
         Reservation reservation = new Reservation(userId, car);
-        reservationService.registerReservation(reservation);
+
+        //Save the reservation
+        reservationRepository.save(reservation);
 
         //Set the reservation state of the car
         car.setLatestReservation(reservation);

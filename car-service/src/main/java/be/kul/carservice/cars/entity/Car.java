@@ -55,7 +55,7 @@ public class Car {
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     private Point location;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "reservation_id")
     private Reservation latestReservation;
 
