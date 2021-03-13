@@ -13,11 +13,13 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
  * Configures our application with Spring Security to restrict access to our API endpoints.
  */
 @Configuration
+@CrossOrigin
 @EnableWebFluxSecurity
 public class SecurityConfig{
     @Value( "${auth0.audience}" )
@@ -28,7 +30,7 @@ public class SecurityConfig{
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http.csrf().disable()
+        http.cors().and().csrf().disable()
                 .authorizeExchange()
                 .anyExchange().authenticated()
                 .and().cors()

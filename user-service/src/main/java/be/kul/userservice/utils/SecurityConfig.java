@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.jwt.*;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     protected void configure(HttpSecurity http) throws Exception {
-        http
+        http.cors().and().csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/**").hasAuthority("SCOPE_user:service")
                 .anyRequest().authenticated()
