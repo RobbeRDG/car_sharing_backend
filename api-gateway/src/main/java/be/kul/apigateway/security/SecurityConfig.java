@@ -4,6 +4,7 @@ package be.kul.apigateway.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  * Configures our application with Spring Security to restrict access to our API endpoints.
  */
 @Configuration
-@CrossOrigin
 @EnableWebFluxSecurity
 public class SecurityConfig{
     @Value( "${auth0.audience}" )
@@ -32,6 +32,7 @@ public class SecurityConfig{
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http.cors().and().csrf().disable()
                 .authorizeExchange()
+                .pathMatchers(HttpMethod.GET, "/car-service/cars/available").permitAll()
                 .anyExchange().authenticated()
                 .and().cors()
                 .and().oauth2ResourceServer().jwt();

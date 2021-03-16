@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin
 @RequestMapping(path="/user-service")
 public class UserController {
     @Autowired
