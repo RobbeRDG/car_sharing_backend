@@ -17,7 +17,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .cors()
+                .and().csrf().disable()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/car-service/cars/available").permitAll()
                 .antMatchers(HttpMethod.POST, "/car-service/cars").hasAuthority("SCOPE_car:service:add_car")
@@ -25,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/**").hasAuthority("SCOPE_car:service")
                 .anyRequest().authenticated()
                 .and().oauth2ResourceServer().jwt();
+
     }
 
 }

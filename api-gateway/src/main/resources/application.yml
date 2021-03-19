@@ -4,16 +4,6 @@ server:
 spring:
   application:
     name: API-GATEWAY
-  cloud:
-    gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
   security:
     oauth2:
       resourceserver:

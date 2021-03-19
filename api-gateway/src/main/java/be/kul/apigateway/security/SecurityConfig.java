@@ -15,6 +15,11 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 /**
  * Configures our application with Spring Security to restrict access to our API endpoints.
@@ -30,11 +35,12 @@ public class SecurityConfig{
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http.cors().and().csrf().disable()
+        http
+                .cors()
+                .and().csrf().disable()
                 .authorizeExchange()
                 .pathMatchers(HttpMethod.GET, "/car-service/cars/available").permitAll()
                 .anyExchange().authenticated()
-                .and().cors()
                 .and().oauth2ResourceServer().jwt();
 
         return http.build();
@@ -57,5 +63,21 @@ public class SecurityConfig{
         jwtDecoder.setJwtValidator(withAudience);
 
         return jwtDecoder;
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfiguration() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.applyPermitDefaultValues();
+        corsConfig.addAllowedMethod(HttpMethod.PUT);
+        corsConfig.addAllowedMethod(HttpMethod.GET);
+        corsConfig.addAllowedMethod(HttpMethod.POST);
+        corsConfig.addAllowedMethod(HttpMethod.OPTIONS);
+        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return source;
     }
 }
