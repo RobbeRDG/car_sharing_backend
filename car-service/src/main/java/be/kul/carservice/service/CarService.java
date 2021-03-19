@@ -1,31 +1,22 @@
-package be.kul.carservice.cars.service;
+package be.kul.carservice.service;
 
-import be.kul.carservice.cars.entity.Car;
-import be.kul.carservice.cars.repository.CarRepository;
-import be.kul.carservice.reservations.entity.Reservation;
-import be.kul.carservice.reservations.repository.ReservationRepository;
-import be.kul.carservice.reservations.service.ReservationService;
+import be.kul.carservice.entity.Car;
+import be.kul.carservice.repository.CarRepository;
+import be.kul.carservice.entity.Reservation;
+import be.kul.carservice.repository.ReservationRepository;
 import be.kul.carservice.utils.exceptions.AlreadyExistsException;
 import be.kul.carservice.utils.exceptions.DoesntExistException;
 import be.kul.carservice.utils.exceptions.NotAvailableException;
 import be.kul.carservice.utils.exceptions.ReservationCooldownException;
 import be.kul.carservice.utils.jsonObjects.CarStateUpdate;
-import com.netflix.discovery.converters.Auto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class CarService {
@@ -35,9 +26,6 @@ public class CarService {
 
     @Autowired
     private CarRepository carRepository;
-
-    @Autowired
-    private ReservationService reservationService;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -75,7 +63,7 @@ public class CarService {
             throw new AlreadyExistsException(errorMessage.toString());
         }
 
-        logger.info("Cars created");
+        logger.info("Multiple cars created");
         return carRepository.saveAll(carList);
     }
 
@@ -100,6 +88,7 @@ public class CarService {
         return carRepository.save(car);
     }
 
+
     @Transactional(dontRollbackOn = {NotAvailableException.class, DoesntExistException.class, ReservationCooldownException.class})
     public Car reserveCar(String userId, long id) {
         //Get the requested car
@@ -115,7 +104,7 @@ public class CarService {
         }
 
         //Check if the user can place a reservation
-        if(reservationService.isUserOnCooldown(userId, reservationCooldownInMinutes)) throw new ReservationCooldownException("The car can't be reserved: user is still on cooldown");
+        if(isUserOnCooldown(userId, reservationCooldownInMinutes)) throw new ReservationCooldownException("The car can't be reserved: user is still on cooldown");
 
         //Create a new reservation
         Reservation reservation = new Reservation(userId, car);
@@ -126,7 +115,37 @@ public class CarService {
         //Set the reservation state of the car
         car.setLatestReservation(reservation);
 
+        //Log the reservation
+        logger.info("Placed reservation on car with id '" + id + "'");
+
         //Save the new state
         return carRepository.save(car);
+    }
+
+    public Reservation registerReservation(Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
+
+    public boolean isReserved(long carId) {
+        Reservation mostRecent =  reservationRepository.getMostRecentReservationForCar(carId).orElse(null);
+
+        //If there are no reservations on the car
+        if (mostRecent==null) return false;
+
+        //Check if the most recent reservation has already expired
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        Timestamp validUntil = mostRecent.getValidUntil();
+        if(validUntil.before(currentTime)) return false;
+        else return true;
+    }
+
+    public boolean isUserOnCooldown(String userId, int reservationCooldownInMinutes) {
+        Reservation mostRecent =  reservationRepository.getMostRecentReservationFromUser(userId).orElse(null);
+        if (mostRecent==null) return false;
+
+        Timestamp currentTimeMinusCooldown = new Timestamp(System.currentTimeMillis() - reservationCooldownInMinutes*60*1000);
+        if (mostRecent.getCreatedOn().before(currentTimeMinusCooldown)) return false;
+        return true;
     }
 }

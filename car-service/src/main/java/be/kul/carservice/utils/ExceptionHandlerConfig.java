@@ -1,14 +1,12 @@
 package be.kul.carservice.utils;
 
-import be.kul.carservice.cars.service.CarService;
+import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.exceptions.AlreadyExistsException;
 import be.kul.carservice.utils.exceptions.DoesntExistException;
 import be.kul.carservice.utils.exceptions.NotAvailableException;
 import be.kul.carservice.utils.exceptions.ReservationCooldownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +14,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 
 @ControllerAdvice
 public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {

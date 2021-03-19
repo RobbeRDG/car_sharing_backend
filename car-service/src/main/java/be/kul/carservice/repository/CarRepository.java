@@ -1,11 +1,11 @@
-package be.kul.carservice.cars.repository;
+package be.kul.carservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import be.kul.carservice.cars.entity.Car;
+import be.kul.carservice.entity.Car;
 
 import javax.persistence.LockModeType;
 import java.util.*;

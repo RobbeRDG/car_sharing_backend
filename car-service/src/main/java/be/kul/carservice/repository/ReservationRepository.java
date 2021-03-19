@@ -1,6 +1,6 @@
-package be.kul.carservice.reservations.repository;
+package be.kul.carservice.repository;
 
-import be.kul.carservice.reservations.entity.Reservation;
+import be.kul.carservice.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,6 +1,5 @@
-package be.kul.carservice.reservations.entity;
+package be.kul.carservice.entity;
 
-import be.kul.carservice.cars.entity.Car;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

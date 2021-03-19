@@ -1,17 +1,14 @@
-package be.kul.carservice.cars.controller;
+package be.kul.carservice.controller;
 
-import be.kul.carservice.cars.entity.Car;
-import be.kul.carservice.cars.service.CarService;
+import be.kul.carservice.entity.Car;
+import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.jsonObjects.CarStateUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.PathParam;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(path="/car-service")
