@@ -11,13 +11,13 @@ spring:
           issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
 
 eureka:
+  instance:
+    hostname: localhost
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
       default-zone: http://localhost:8761/eureka/
-    instance:
-      hostname: localhost
 
 auth0:
   audience: https://bachelorproject/api

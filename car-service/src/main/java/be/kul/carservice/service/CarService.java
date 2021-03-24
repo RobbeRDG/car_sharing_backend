@@ -22,7 +22,7 @@ import java.util.List;
 public class CarService {
     Logger logger = LoggerFactory.getLogger(CarService.class);
 
-    private static final int reservationCooldownInMinutes = 120;
+    private static final int RESERVATION_COOLDOWN_IN_MINUTES = 120;
 
     @Autowired
     private CarRepository carRepository;
@@ -104,7 +104,7 @@ public class CarService {
         }
 
         //Check if the user can place a reservation
-        if(isUserOnCooldown(userId, reservationCooldownInMinutes)) throw new ReservationCooldownException("The car can't be reserved: user is still on cooldown");
+        if(isUserOnCooldown(userId, RESERVATION_COOLDOWN_IN_MINUTES)) throw new ReservationCooldownException("The car can't be reserved: user is still on cooldown");
 
         //Create a new reservation
         Reservation reservation = new Reservation(userId, car);
