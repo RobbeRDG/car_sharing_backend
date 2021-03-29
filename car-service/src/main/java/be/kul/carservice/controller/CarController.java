@@ -55,4 +55,16 @@ public class CarController {
         return carService.reserveCar(userId, id);
     }
 
+    /*
+    @PutMapping("/cars/unlock/{carId}")
+    public @ResponseBody Car unlockCar(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long carId
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return carService.unlockCar(userId, carId);
+    }
+
+     */
+
 }

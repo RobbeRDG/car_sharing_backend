@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,7 +20,16 @@ public class Reservation {
     private static final int reservationIntervalInSeconds = 900;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "reservation-sequence-generator")
+    @GenericGenerator(
+            name = "reservation-sequence-generator",
+            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+            parameters = {
+                    @Parameter(name = "sequence_name", value = "reservation_sequence"),
+                    @Parameter(name = "initial_value", value = "1"),
+                    @Parameter(name = "increment_size", value = "1")
+            }
+    )
     private long reservationId;
 
     @NotNull
@@ -27,7 +39,7 @@ public class Reservation {
     @NotNull
     private Timestamp validUntil;
     @JsonIgnore
-    @ManyToOne()
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "car_id")
     private Car car;
 

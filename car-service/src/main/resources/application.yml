@@ -19,11 +19,7 @@ spring:
           issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
 
 eureka:
-  intsance:
-    hostname: localhost
   client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      default-zone: http://localhost:8761/eureka/
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 

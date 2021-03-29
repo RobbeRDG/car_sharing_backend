@@ -5,12 +5,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.locationtech.jts.geom.Point;
 import org.n52.jackson.datatype.jts.GeometryDeserializer;
 import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -18,7 +21,16 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class Car {
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "car-sequence-generator")
+    @GenericGenerator(
+            name = "car-sequence-generator",
+            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+            parameters = {
+                    @Parameter(name = "sequence_name", value = "car_sequence"),
+                    @Parameter(name = "initial_value", value = "1"),
+                    @Parameter(name = "increment_size", value = "1")
+            }
+    )
     private long carId;
     @Version
     private long version;
@@ -40,20 +52,19 @@ public class Car {
 
     //Car state
     @NotNull
-    private boolean inUse;
-    @NotNull
     private boolean inMaintenance;
     @NotNull
     private int remainingFuelInKilometers;
-
     @NotNull
     @JsonSerialize( using = GeometrySerializer.class)
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     private Point location;
-
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "reservation_id")
-    private Reservation latestReservation;
+    private Reservation currentReservation;
+    @OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "ride_id")
+    private Ride currentRide;
 
 
     public String getNumberPlate() {
@@ -68,20 +79,24 @@ public class Car {
         this.location = location;
     }
 
-
-    public boolean isInUse() {
-        return inUse;
-    }
-
     public boolean isInMaintenance() {
         return inMaintenance;
     }
 
-    public Reservation getLatestReservation() {
-        return latestReservation;
+    public Reservation getCurrentReservation() {
+        return currentReservation;
     }
 
-    public void setLatestReservation(Reservation latestReservation) {
-        this.latestReservation = latestReservation;
+    public void setCurrentReservation(Reservation currentReservation) {
+        this.currentReservation = currentReservation;
+    }
+
+    public boolean isFree() {
+        if (
+                inMaintenance
+                || currentRide != null
+                || currentReservation != null
+        ) return false;
+        else return true;
     }
 }

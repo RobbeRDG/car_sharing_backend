@@ -95,13 +95,8 @@ public class CarService {
         Car car = carRepository.findById(id).orElse(null);
         if (car==null) throw new DoesntExistException("The car with id '" + id + " doesn't exist");
 
-        //check if the car is not in use or in maintenance
-        if (car.isInMaintenance() || car.isInUse()) throw new NotAvailableException("The car with id '" + id + "' is not available");
-
-        //Check if there isn't already a reservation on the car
-        if (car.getLatestReservation() != null && car.getLatestReservation().getValidUntil().after(new Timestamp(System.currentTimeMillis()))) {
-            throw new NotAvailableException("The car with id '" + id + "' is not available");
-        }
+        //check if the car is not in use or in maintenance or reserved
+        if (!car.isFree()) throw new NotAvailableException("The car with id '" + id + "' is not available");
 
         //Check if the user can place a reservation
         if(isUserOnCooldown(userId, RESERVATION_COOLDOWN_IN_MINUTES)) throw new ReservationCooldownException("The car can't be reserved: user is still on cooldown");
@@ -113,7 +108,7 @@ public class CarService {
         reservationRepository.save(reservation);
 
         //Set the reservation state of the car
-        car.setLatestReservation(reservation);
+        car.setCurrentReservation(reservation);
 
         //Log the reservation
         logger.info("Placed reservation on car with id '" + id + "'");
@@ -125,6 +120,7 @@ public class CarService {
     public Reservation registerReservation(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
+
 
 
     public boolean isReserved(long carId) {

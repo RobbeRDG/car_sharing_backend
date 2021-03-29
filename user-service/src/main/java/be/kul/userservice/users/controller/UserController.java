@@ -39,7 +39,7 @@ public class UserController {
     }
 
 
-    @RequestMapping(path="/users/get-id")
+    @GetMapping(path="/users/get-id")
     public @ResponseBody String test(@AuthenticationPrincipal Jwt principal) {
         return principal.getClaimAsString("sub");
     }
