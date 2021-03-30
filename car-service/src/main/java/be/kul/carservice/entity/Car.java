@@ -1,5 +1,8 @@
 package be.kul.carservice.entity;
 
+import be.kul.carservice.utils.jsonViews.Views;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -13,13 +16,13 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Car {
+
     @Id
     @GeneratedValue(generator = "car-sequence-generator")
     @GenericGenerator(
@@ -31,39 +34,52 @@ public class Car {
                     @Parameter(name = "increment_size", value = "1")
             }
     )
+    @JsonView(Views.CarView.Basic.class)
     private long carId;
     @Version
+    @JsonIgnore
     private long version;
 
     //Car information
     @NotNull
+    @JsonView(Views.CarView.Basic.class)
     private int numberOfSeats;
     @NotNull
+    @JsonView(Views.CarView.Basic.class)
     private String color;
     @NotNull
+    @JsonView(Views.CarView.Basic.class)
     private String manufacturer;
     @NotNull
+    @JsonView(Views.CarView.Basic.class)
     private String model;
     @NotNull
+    @JsonView(Views.CarView.Basic.class)
     private String yearOfManufacture;
     @NotNull
     @Column(unique=true)
+    @JsonView(Views.CarView.Basic.class)
     private String numberPlate;
 
     //Car state
     @NotNull
+    @JsonView(Views.CarView.Full.class)
     private boolean inMaintenance;
     @NotNull
+    @JsonView(Views.CarView.Basic.class)
     private int remainingFuelInKilometers;
     @NotNull
     @JsonSerialize( using = GeometrySerializer.class)
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
+    @JsonView(Views.CarView.Basic.class)
     private Point location;
     @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "reservation_id")
+    @JsonView(Views.CarView.Reserved.class)
     private Reservation currentReservation;
     @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ride_id")
+    @JsonView(Views.CarView.Ride.class)
     private Ride currentRide;
 
 

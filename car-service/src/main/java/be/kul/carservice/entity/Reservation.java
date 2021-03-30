@@ -1,12 +1,13 @@
 package be.kul.carservice.entity;
 
+import be.kul.carservice.utils.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -30,13 +31,17 @@ public class Reservation {
                     @Parameter(name = "increment_size", value = "1")
             }
     )
+    @JsonView(Views.CarView.Reserved.class)
     private long reservationId;
 
     @NotNull
-    private String userId;
+    @JsonView(Views.CarView.Reserved.class)
+    private String user_id;
     @NotNull
+    @JsonView(Views.CarView.Reserved.class)
     private Timestamp createdOn;
     @NotNull
+    @JsonView(Views.CarView.Reserved.class)
     private Timestamp validUntil;
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.PERSIST)
@@ -44,8 +49,8 @@ public class Reservation {
     private Car car;
 
 
-    public Reservation(@NotNull String userId, @NotNull Car car) {
-        this.userId = userId;
+    public Reservation(@NotNull String user_id, @NotNull Car car) {
+        this.user_id = user_id;
         this.car = car;
 
         long currentTime = System.currentTimeMillis();

@@ -26,6 +26,7 @@ dependencies {
 	implementation 'org.springframework.security:spring-security-oauth2-jose'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.n52.jackson:jackson-datatype-jts:1.2.8'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	runtimeOnly 'mysql:mysql-connector-java'

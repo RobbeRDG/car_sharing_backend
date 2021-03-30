@@ -1,8 +1,8 @@
 package be.kul.carservice.service;
 
 import be.kul.carservice.entity.Car;
-import be.kul.carservice.repository.CarRepository;
 import be.kul.carservice.entity.Reservation;
+import be.kul.carservice.repository.CarRepository;
 import be.kul.carservice.repository.ReservationRepository;
 import be.kul.carservice.utils.exceptions.AlreadyExistsException;
 import be.kul.carservice.utils.exceptions.DoesntExistException;
