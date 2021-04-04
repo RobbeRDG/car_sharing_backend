@@ -1,1 +1,1 @@
-mysqldump -u root -p --all-databases > C:\Users\robbe\Documents\School\2020-2021\Sem2\Project\project-backend\resources\DBDumps\dump_13_02_2021.sql
+.\mysqldump -u root -p --default-character-set=utf8 --all-databases -r C:\Users\robbe\Documents\School\2020-2021\Sem2\Project\project-backend\resources\DBDumps\dump_04_04_2021.sql
