@@ -18,17 +18,17 @@ public class CarController {
     @Autowired
     private CarService carService;
 
-    @PostMapping("/cars")
+    @PostMapping("/admin/cars")
     public @ResponseBody Car registerCar(@RequestBody Car car) {
         return carService.registerCar(car);
     }
 
-    @PostMapping("/cars/batch")
+    @PostMapping("/admin/cars/batch")
     public @ResponseBody List<Car> registerCar(@RequestBody List<Car> carList) {
         return carService.registerCars(carList);
     }
 
-    @GetMapping("/cars")
+    @GetMapping("/admin/cars")
     public @ResponseBody
     @JsonView(Views.CarView.Full.class )
     List<Car> getAllCarsWithinRadius(@RequestParam double longitude, @RequestParam double latitude, @RequestParam double radiusInKM) {
@@ -42,7 +42,7 @@ public class CarController {
         return carService.findAllAvailableCarsWithinRadius(longitude, latitude, radiusInKM);
     }
 
-    @PutMapping("/cars/state/{id}")
+    @PutMapping("/admin/cars/state/{id}")
     @JsonView(Views.CarView.Full.class)
     public @ResponseBody Car updateCarState(
             @RequestBody CarStateUpdate stateUpdate,
@@ -60,6 +60,4 @@ public class CarController {
         String userId = principal.getClaimAsString("sub");
         return carService.reserveCar(userId, id);
     }
-
-
 }

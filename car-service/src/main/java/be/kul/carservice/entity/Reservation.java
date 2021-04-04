@@ -36,7 +36,7 @@ public class Reservation {
 
     @NotNull
     @JsonView(Views.CarView.Reserved.class)
-    private String user_id;
+    private String userId;
     @NotNull
     @JsonView(Views.CarView.Reserved.class)
     private Timestamp createdOn;
@@ -49,8 +49,8 @@ public class Reservation {
     private Car car;
 
 
-    public Reservation(@NotNull String user_id, @NotNull Car car) {
-        this.user_id = user_id;
+    public Reservation(@NotNull String userId, @NotNull Car car) {
+        this.userId = userId;
         this.car = car;
 
         long currentTime = System.currentTimeMillis();
