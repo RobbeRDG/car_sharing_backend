@@ -64,6 +64,9 @@ public class Car {
     //Car state
     @NotNull
     @JsonView(Views.CarView.Full.class)
+    private boolean active;
+    @NotNull
+    @JsonView(Views.CarView.Full.class)
     private boolean inMaintenance;
     @NotNull
     @JsonView(Views.CarView.Basic.class)
@@ -109,7 +112,8 @@ public class Car {
 
     public boolean isFree() {
         if (
-                inMaintenance
+                !active
+                || inMaintenance
                 || currentRide != null
                 || currentReservation != null
         ) return false;
