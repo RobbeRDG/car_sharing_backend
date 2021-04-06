@@ -91,7 +91,6 @@ public class CarService {
         //Update parameters
         car.setRemainingFuelInKilometers(stateUpdate.getRemainingFuelInKilometers());
         car.setLocation(stateUpdate.getLocation());
-        logger.info(String.valueOf(stateUpdate.isOnline()));
         car.setOnline(stateUpdate.isOnline());
         car.setLastStateUpdateTimestamp(stateUpdate.getCreatedOn());
         logger.info("Updated car state of car with id '" + carId + "'");

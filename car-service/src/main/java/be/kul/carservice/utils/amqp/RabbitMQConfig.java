@@ -24,13 +24,6 @@ public class RabbitMQConfig {
     public final static String STATE_UPDATE_BINDING_KEY = "stateUpdate";
 
     @Bean
-    public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
-        DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
-        factory.setMessageConverter(new MappingJackson2MessageConverter());
-        return factory;
-    }
-
-    @Bean
     public CachingConnectionFactory connectionFactory() {
 		CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(RABBITMQ_CONNECTION_HOST);
 		cachingConnectionFactory.setUsername(RABBITMQ_CONNECTION_USERNAME);
@@ -45,8 +38,6 @@ public class RabbitMQConfig {
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory() {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory());
-        factory.setConcurrentConsumers(3);
-        factory.setMaxConcurrentConsumers(10);
         return factory;
     }
 
