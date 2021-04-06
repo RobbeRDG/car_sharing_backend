@@ -1,4 +1,4 @@
-package be.kul.carservice.utils;
+package be.kul.carservice.utils.security;
 
 
 import org.springframework.http.HttpMethod;

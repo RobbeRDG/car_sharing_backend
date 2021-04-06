@@ -1,6 +1,6 @@
 package be.kul.carservice.entity;
 
-import be.kul.carservice.utils.jsonViews.Views;
+import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -16,6 +16,7 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -64,7 +65,13 @@ public class Car {
     //Car state
     @NotNull
     @JsonView(Views.CarView.Full.class)
-    private boolean active;
+    private Timestamp lastStateUpdateTimestamp;
+    @NotNull
+    @JsonView(Views.CarView.Full.class)
+    private boolean online; //If the car is online
+    @NotNull
+    @JsonView(Views.CarView.Full.class)
+    private boolean active; //If the car is activated for requests
     @NotNull
     @JsonView(Views.CarView.Full.class)
     private boolean inMaintenance;
@@ -110,13 +117,27 @@ public class Car {
         this.currentReservation = currentReservation;
     }
 
-    public boolean isFree() {
+    public boolean canBeReserved() {
         if (
-                !active
+                !online
+                || !active
                 || inMaintenance
                 || currentRide != null
                 || currentReservation != null
         ) return false;
         else return true;
     }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public void setLastStateUpdateTimestamp(Timestamp lastStateUpdateTimestamp) {
+        this.lastStateUpdateTimestamp = lastStateUpdateTimestamp;
+    }
+
 }

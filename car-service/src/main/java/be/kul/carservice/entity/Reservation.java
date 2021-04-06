@@ -1,6 +1,6 @@
 package be.kul.carservice.entity;
 
-import be.kul.carservice.utils.jsonViews.Views;
+import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;

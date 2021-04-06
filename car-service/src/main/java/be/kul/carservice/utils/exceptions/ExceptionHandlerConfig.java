@@ -1,10 +1,6 @@
-package be.kul.carservice.utils;
+package be.kul.carservice.utils.exceptions;
 
 import be.kul.carservice.service.CarService;
-import be.kul.carservice.utils.exceptions.AlreadyExistsException;
-import be.kul.carservice.utils.exceptions.DoesntExistException;
-import be.kul.carservice.utils.exceptions.NotAvailableException;
-import be.kul.carservice.utils.exceptions.ReservationCooldownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;

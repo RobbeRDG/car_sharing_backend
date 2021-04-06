@@ -22,7 +22,7 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     boolean existsByNumberPlate(String numberPlate);
 
-    @Query(value = "SELECT * FROM cars.car as c WHERE ST_Distance(c.location, ST_SRID(POINT( :userLongitude, :userLatitude ), 4326)) < ( :radiusInKM * 1000) and active=true and in_maintenance=false and c.ride_id is null and c.reservation_id is null ORDER BY ST_Distance(c.location, ST_SRID(POINT( :userLongitude, :userLatitude ), 4326))"
+    @Query(value = "SELECT * FROM cars.car as c WHERE ST_Distance(c.location, ST_SRID(POINT( :userLongitude, :userLatitude ), 4326)) < ( :radiusInKM * 1000) and online=true and active=true and in_maintenance=false and c.ride_id is null and c.reservation_id is null ORDER BY ST_Distance(c.location, ST_SRID(POINT( :userLongitude, :userLatitude ), 4326))"
             , nativeQuery = true)
     List<Car> findAllAvailableCarsWithinRadius(@Param("userLongitude") double userLongitude, @Param("userLatitude") double userLatitude, @Param("radiusInKM") double radiusInKM);
 

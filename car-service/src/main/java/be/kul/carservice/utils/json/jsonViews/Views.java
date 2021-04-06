@@ -1,4 +1,4 @@
-package be.kul.carservice.utils.jsonViews;
+package be.kul.carservice.utils.json.jsonViews;
 
 public class Views {
     public static interface CarView {

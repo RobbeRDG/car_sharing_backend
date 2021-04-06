@@ -1,4 +1,4 @@
-package be.kul.carservice.utils;
+package be.kul.carservice.utils.json;
 
 import org.n52.jackson.datatype.jts.JtsModule;
 import org.springframework.context.annotation.Bean;
