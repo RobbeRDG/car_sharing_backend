@@ -23,7 +23,7 @@ public class AmqpController {
 
     Logger logger = LoggerFactory.getLogger(AmqpController.class);
 
-    @RabbitListener(queues = RabbitMQConfig.CAR_STATE_UPDATE_QUEUE_NAME)
+    @RabbitListener(queues = RabbitMQConfig.CAR_STATE_UPDATE_QUEUE_NAME, containerFactory = "externalRabbitListenerContainerFactory")
     public void updateCarState(@Payload String stateUpdateString) throws JsonProcessingException {
         //get the stateUpdate object from the string
         CarStateUpdate stateUpdate = objectMapper.readValue(stateUpdateString, CarStateUpdate.class);

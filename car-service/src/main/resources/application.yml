@@ -17,7 +17,15 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://dev-9-mfnegy.eu.auth0.com/
-
+  rabbitmq:
+    external:
+      host: rat.rmq2.cloudamqp.com
+      username: iyopjwwd
+      password: ntVEoqTWlN38mXwCrhgdHUmDaOwB86N1
+    internal:
+      host: rat.rmq2.cloudamqp.com
+      username: lzufimom
+      password: llcqxq_5XuJES-s0hhmiinhDfV3kVCDj
 eureka:
   client:
     serviceUrl:
