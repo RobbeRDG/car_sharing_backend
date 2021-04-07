@@ -239,12 +239,13 @@ public class CarService {
         //Set the new state not-responding car
         car.setOnline(false);
         car.setLastStateUpdateTimestamp(new Timestamp(System.currentTimeMillis()));
+        car.getCurrentRide().setCurrentState(RideState.CANCELED);
 
         //Save the car state
         carRepository.save(car);
     }
 
-    public ResponseEntity<Object> lockCar(String userId, long carId,boolean lock) throws JsonProcessingException {
+    public Car lockCar(String userId, long carId, boolean lock) throws JsonProcessingException {
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
         if (car==null) throw new DoesntExistException("Couldn't lock car: The car with id '" + carId + " doesn't exist");
@@ -263,8 +264,10 @@ public class CarService {
         if(ack.confirmsLockRequest(carLockRequest)) throw new NotAvailableException(
                 "Couldn't lock/unlock car: The car with id '" + carId + "' can't be locked/unlocked now");
 
+        //Set the car door state
+        car.setCarDoorsLocked(lock);
+
         //Return to client
-        if (lock) return ResponseEntity.ok().body("car is locked");
-        return ResponseEntity.ok().body("car is unlocked");
+        return carRepository.save(car);
     }
 }

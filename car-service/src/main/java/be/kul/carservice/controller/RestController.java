@@ -93,7 +93,7 @@ public class RestController {
     @PutMapping("/cars/lock/{carId}")
     @JsonView(Views.CarView.Ride.class)
     public @ResponseBody
-    ResponseEntity<Object> lockCar(
+    Car lockCar(
             @AuthenticationPrincipal Jwt principal,
             @PathVariable long carId
     ) throws Exception {
@@ -104,7 +104,7 @@ public class RestController {
     @PutMapping("/cars/unlock/{carId}")
     @JsonView(Views.CarView.Ride.class)
     public @ResponseBody
-    ResponseEntity<Object> unlockCar(
+    Car unlockCar(
             @AuthenticationPrincipal Jwt principal,
             @PathVariable long carId
     ) throws Exception {

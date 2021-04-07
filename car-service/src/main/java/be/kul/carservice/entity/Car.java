@@ -73,6 +73,9 @@ public class Car {
     @JsonView(Views.CarView.Full.class)
     private boolean active; //If the car is activated for requests
     @NotNull
+    @JsonView(Views.CarView.Ride.class)
+    private boolean carDoorsLocked;
+    @NotNull
     @JsonView(Views.CarView.Full.class)
     private boolean inMaintenance;
     @NotNull
@@ -158,5 +161,9 @@ public class Car {
 
     public Ride getCurrentRide() {
         return currentRide;
+    }
+
+    public void setCarDoorsLocked(boolean lock) {
+        carDoorsLocked=lock;
     }
 }
