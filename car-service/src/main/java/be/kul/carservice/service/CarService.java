@@ -1,17 +1,20 @@
 package be.kul.carservice.service;
 
+import be.kul.carservice.controller.amqp.AmqpProducerController;
 import be.kul.carservice.entity.Car;
 import be.kul.carservice.entity.Reservation;
+import be.kul.carservice.entity.Ride;
 import be.kul.carservice.repository.CarRepository;
 import be.kul.carservice.repository.ReservationRepository;
-import be.kul.carservice.utils.exceptions.AlreadyExistsException;
-import be.kul.carservice.utils.exceptions.DoesntExistException;
-import be.kul.carservice.utils.exceptions.NotAvailableException;
-import be.kul.carservice.utils.exceptions.ReservationCooldownException;
-import be.kul.carservice.utils.json.jsonObjects.CarStateUpdate;
+import be.kul.carservice.repository.RideRepository;
+import be.kul.carservice.utils.exceptions.*;
+import be.kul.carservice.utils.helperObjects.RideState;
+import be.kul.carservice.utils.json.jsonObjects.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
@@ -19,15 +22,21 @@ import java.util.List;
 
 @org.springframework.stereotype.Service
 public class CarService {
-    Logger logger = LoggerFactory.getLogger(CarService.class);
+    public static final Logger logger = LoggerFactory.getLogger(CarService.class);
 
     private static final int RESERVATION_COOLDOWN_IN_MINUTES = 120;
+
+    @Autowired
+    private AmqpProducerController amqpProducerController;
 
     @Autowired
     private CarRepository carRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private RideRepository rideRepository;
 
 
     public Car registerCar(Car car) {
@@ -103,13 +112,13 @@ public class CarService {
     public Car reserveCar(String userId, long id) {
         //Get the requested car
         Car car = carRepository.findById(id).orElse(null);
-        if (car==null) throw new DoesntExistException("The car with id '" + id + " doesn't exist");
+        if (car==null) throw new DoesntExistException("Couldn't reserve car: The car with id '" + id + " doesn't exist");
 
         //check if the car is not in use or in maintenance or reserved
-        if (!car.canBeReserved()) throw new NotAvailableException("The car with id '" + id + "' is not available");
+        if (!car.canBeReserved()) throw new NotAvailableException("Couldn't reserve car: The car with id '" + id + "' can't be reserved now");
 
         //Check if the user can place a reservation
-        if(isUserOnCooldown(userId, RESERVATION_COOLDOWN_IN_MINUTES)) throw new ReservationCooldownException("The car can't be reserved: user is still on cooldown");
+        if(isUserOnCooldown(userId, RESERVATION_COOLDOWN_IN_MINUTES)) throw new ReservationCooldownException("Couldn't reserve car: User is still on cooldown");
 
         //Create a new reservation
         Reservation reservation = new Reservation(userId, car);
@@ -158,7 +167,7 @@ public class CarService {
     public Car setCarToActive(long carId) {
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
-        if (car==null) throw new DoesntExistException("The car with id '" + carId + " doesn't exist");
+        if (car==null) throw new DoesntExistException("Couldn't set car to active: The car with id '" + carId + " doesn't exist");
 
         //Set the car to active state
         car.setActive(true);
@@ -170,12 +179,92 @@ public class CarService {
     public Car setCarToInactive(long carId) {
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
-        if (car==null) throw new DoesntExistException("The car with id '" + carId + " doesn't exist");
+        if (car==null) throw new DoesntExistException("Couldn't set car to inactive: The car with id '" + carId + " doesn't exist");
 
         //Set the car to active state
         car.setActive(false);
 
         //Save and return the car
         return carRepository.save(car);
+    }
+
+    public Car rideCar(String userId, long carId) throws Exception {
+        //Get the requested car
+        Car car = carRepository.findById(carId).orElse(null);
+        if (car==null) throw new DoesntExistException("Couldn't start ride: The car with id '" + carId + " doesn't exist");
+
+        //check if the car can be ridden
+        if (!car.canBeRidden(userId)) throw new NotAvailableException(
+                "Couldn't start ride: The car with id '" + carId + "' can't be ridden now");
+
+        //Create a new ride
+        Ride ride = new Ride(userId, car);
+
+        //Save the new ride
+        rideRepository.save(ride);
+
+        //Send a ride request to the car and wait for response
+        CarRideRequest rideRequest = new CarRideRequest(ride);
+        CarAcknowledgement ack;
+        try {
+            ack = amqpProducerController.sendCarRideRequest(rideRequest);
+        } catch(CarOfflineException e) {
+            handleCarOfflineException(carId);
+            throw e;
+        }
+
+        //Check if the acknowledgement confirms the ride request
+        if(ack.confirmsRideRequest(rideRequest)) throw new NotAvailableException(
+                "Couldn't start ride: The car with id '" + carId + "' can't be ridden now");
+
+        //Set the ride state to IN_PROGRESS
+        ride.setCurrentState(RideState.IN_PROGRESS);
+
+        //Set the new car state
+        car.setCurrentRide(ride);
+
+        //Send a RideInitialisation to the ride service
+        RideInitialisation rideInitialisation = new RideInitialisation(ride);
+        amqpProducerController.sendRideInitialisation(rideInitialisation);
+
+        //Return the new car state
+        return carRepository.save(car);
+    }
+
+    private void handleCarOfflineException(long carId) throws Exception {
+        //Get the not-responding car
+        Car car = carRepository.findById(carId).orElse(null);
+        if (car==null) throw new Exception("Couldn't handle offlineException: The car with id '" + carId + " doesn't exist");
+
+        //Set the new state not-responding car
+        car.setOnline(false);
+        car.setLastStateUpdateTimestamp(new Timestamp(System.currentTimeMillis()));
+
+        //Save the car state
+        carRepository.save(car);
+    }
+
+    public ResponseEntity<Object> lockCar(String userId, long carId,boolean lock) throws JsonProcessingException {
+        //Get the requested car
+        Car car = carRepository.findById(carId).orElse(null);
+        if (car==null) throw new DoesntExistException("Couldn't lock car: The car with id '" + carId + " doesn't exist");
+
+        //Check if the user is currently riding the requested car
+        if (!car.getCurrentRide().getUserId().equals(userId)) throw new NotAllowedException(
+                "Couldn't lock/unlock car: Cars can only be locked when the user is currently riding the car");
+
+        //Create a CarLockRequest
+        CarLockRequest carLockRequest = new CarLockRequest(car.getCurrentRide().getRideId(), carId, true);
+
+        //Send the request to the car
+        CarAcknowledgement ack = amqpProducerController.sendCarLockRequest(carLockRequest);
+
+        //Check if the acknowledgement confirms the lockrequest
+        if(ack.confirmsLockRequest(carLockRequest)) throw new NotAvailableException(
+                "Couldn't lock/unlock car: The car with id '" + carId + "' can't be locked/unlocked now");
+
+        //Return to client
+        if (lock) return ResponseEntity.ok().body("car is locked");
+        return ResponseEntity.ok().body("car is unlocked");
     }
 }

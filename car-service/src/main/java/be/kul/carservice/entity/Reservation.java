@@ -65,4 +65,8 @@ public class Reservation {
     public Timestamp getCreatedOn() {
         return createdOn;
     }
+
+    public String getUserId() {
+        return userId;
+    }
 }

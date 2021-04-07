@@ -1,4 +1,4 @@
-package be.kul.rideservice.utils;
+package be.kul.rideservice.utils.security;
 
 
 import org.springframework.http.HttpMethod;
@@ -16,13 +16,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors()
                 .and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/car-service/cars/available").permitAll()
-                .antMatchers(HttpMethod.POST, "/car-service/cars").hasAuthority("SCOPE_car:service:add_car")
-                .antMatchers(HttpMethod.POST, "/car-service/cars/batch").hasAuthority("SCOPE_car:service:add_car")
-                .antMatchers("/**").hasAuthority("SCOPE_car:service")
+                .antMatchers("/**").hasAuthority("SCOPE_ride:service")
+                .antMatchers("/admin/**").hasAuthority("SCOPE_administration")
                 .anyRequest().authenticated()
                 .and().oauth2ResourceServer().jwt();
-
     }
-
 }

@@ -3,7 +3,6 @@ import pika, os, json
 
 URL="amqps://iyopjwwd:ntVEoqTWlN38mXwCrhgdHUmDaOwB86N1@rat.rmq2.cloudamqp.com/iyopjwwd"
 JSON_MESSAGE={
-    "carId": 3,
     "createdOn": "2021-04-06T13:36:01.000+00:00",
     "online": True,
     "remainingFuelInKilometers": 314,
@@ -23,10 +22,9 @@ test = "testString"
 params = pika.URLParameters(URL)
 connection = pika.BlockingConnection(params)
 channel = connection.channel() # start a channel
-channel.queue_declare(queue='carStateUpdatesToServer', durable=True)
-channel.exchange_declare(exchange='carStateExchangeToServer', exchange_type='direct', durable=True)
-channel.basic_publish(exchange='carStateExchangeToServer',
-                      routing_key='stateUpdate',
+channel.exchange_declare(exchange='carsToServer', exchange_type='topic', durable=True)
+channel.basic_publish(exchange='carsToServer',
+                      routing_key='carService.cars.state.3',
                       body=STATE_UPDATE)
 
 print("sent state update")

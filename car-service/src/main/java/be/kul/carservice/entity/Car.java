@@ -140,4 +140,23 @@ public class Car {
         this.lastStateUpdateTimestamp = lastStateUpdateTimestamp;
     }
 
+    public boolean canBeRidden(String userId) {
+        if (
+                canBeReserved()
+                || (currentReservation!=null && currentReservation.getUserId().equals(userId))
+            ) return true;
+        else return false;
+    }
+
+    public void setCurrentRide(Ride currentRide) {
+        this.currentRide = currentRide;
+    }
+
+    public long getCarId() {
+        return carId;
+    }
+
+    public Ride getCurrentRide() {
+        return currentRide;
+    }
 }

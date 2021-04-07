@@ -1,5 +1,6 @@
 package be.kul.carservice.utils.json.jsonObjects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Setter
 public class CarStateUpdate implements Serializable {
+    @JsonIgnore
     private long carId;
     private Timestamp createdOn;
     private boolean online;

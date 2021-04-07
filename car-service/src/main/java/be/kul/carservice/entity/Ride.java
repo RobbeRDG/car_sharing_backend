@@ -1,5 +1,6 @@
 package be.kul.carservice.entity;
 
+import be.kul.carservice.utils.helperObjects.RideState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,17 +29,54 @@ public class Ride {
             }
     )
     private long rideId;
-
     @NotNull
     private String userId;
     @NotNull
-    private Timestamp startedOn;
-    @NotNull
-    private Timestamp stoppedOn;
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "car_id")
     private Car car;
 
+    @NotNull
+    private Timestamp createdOn;
+    @NotNull
+    private Timestamp lastStateUpdate;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private RideState currentState;
 
+
+    public Ride(@NotNull String userId, @NotNull Car car) {
+        this.userId = userId;
+        this.car = car;
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        this.createdOn = now;
+        this.lastStateUpdate = now;
+        this.currentState = RideState.WAITING_FOR_CAR_ACKNOWLEDGEMENT;
+    }
+
+    public long getRideId() {
+        return rideId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public Timestamp getCreatedOn() {
+        return createdOn;
+    }
+
+    public RideState getCurrentState() {
+        return currentState;
+    }
+
+
+    public void setCurrentState(RideState currentState) {
+        this.currentState = currentState;
+    }
 }

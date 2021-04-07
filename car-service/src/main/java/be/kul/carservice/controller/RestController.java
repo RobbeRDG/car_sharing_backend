@@ -5,7 +5,9 @@ import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.json.jsonObjects.CarStateUpdate;
 import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -76,5 +78,37 @@ public class RestController {
             @PathVariable long carId
     ) {
         return carService.setCarToInactive(carId);
+    }
+
+    @PutMapping("/cars/ride/{carId}")
+    @JsonView(Views.CarView.Ride.class)
+    public @ResponseBody Car rideCar(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long carId
+    ) throws Exception {
+        String userId = principal.getClaimAsString("sub");
+        return carService.rideCar(userId, carId);
+    }
+
+    @PutMapping("/cars/lock/{carId}")
+    @JsonView(Views.CarView.Ride.class)
+    public @ResponseBody
+    ResponseEntity<Object> lockCar(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long carId
+    ) throws Exception {
+        String userId = principal.getClaimAsString("sub");
+        return carService.lockCar(userId, carId, true);
+    }
+
+    @PutMapping("/cars/unlock/{carId}")
+    @JsonView(Views.CarView.Ride.class)
+    public @ResponseBody
+    ResponseEntity<Object> unlockCar(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long carId
+    ) throws Exception {
+        String userId = principal.getClaimAsString("sub");
+        return carService.lockCar(userId, carId, false);
     }
 }

@@ -19,7 +19,8 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
             AlreadyExistsException.class,
             DoesntExistException.class,
             NotAvailableException.class,
-            ReservationCooldownException.class
+            ReservationCooldownException.class,
+            CarOfflineException.class
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
