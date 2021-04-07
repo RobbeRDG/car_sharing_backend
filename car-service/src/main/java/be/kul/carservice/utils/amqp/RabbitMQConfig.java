@@ -18,6 +18,8 @@ public class RabbitMQConfig {
     public static final String CAR_STATE_BINDING_KEY = "carService.cars.state.*";
     public static final String RIDE_INITIALISATION_QUEUE = "rideInitialisation";
     public static final String RIDE_INITIALISATION_BINDING_KEY = "rideService.rides.new.*";
+    public static final String RIDE_WAYPOINT_QUEUE = "rideWaypoint";
+    public static final String RIDE_WAYPOINT_BINDING_KEY = "rideService.rides.waypoint.*";
 
     @Resource(name="externalRabbitAdmin")
     private RabbitAdmin externalRabbitAdmin;

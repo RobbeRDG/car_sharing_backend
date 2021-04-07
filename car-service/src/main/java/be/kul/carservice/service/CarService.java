@@ -92,18 +92,25 @@ public class CarService {
     }
 
 
-    public Car updateCarState(CarStateUpdate stateUpdate) {
+    public Car updateCarState(CarStateUpdate stateUpdate) throws JsonProcessingException {
         long carId = stateUpdate.getCarId();
         Car car = carRepository.findById(carId).orElse(null);
         if (car==null) throw new DoesntExistException("The car with id '" + carId + "' doesn't exist");
 
-        //Update parameters
+        //Update car parameters
         car.setRemainingFuelInKilometers(stateUpdate.getRemainingFuelInKilometers());
         car.setLocation(stateUpdate.getLocation());
         car.setOnline(stateUpdate.isOnline());
         car.setLastStateUpdateTimestamp(stateUpdate.getCreatedOn());
-        logger.info("Updated car state of car with id '" + carId + "'");
 
+        //If the car is in a ride send waypoint to ride service
+        if (car.getCurrentRide()!=null) {
+            RideWaypoint rideWaypoint = new RideWaypoint(stateUpdate, car.getCurrentRide().getRideId());
+            amqpProducerController.sendRideWaypoint(rideWaypoint);
+        }
+
+
+        logger.info("Updated car state of car with id '" + carId + "'");
         return carRepository.save(car);
     }
 
@@ -188,7 +195,7 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    public Car rideCar(String userId, long carId) throws Exception {
+    public Car startRide(String userId, long carId) throws Exception {
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
         if (car==null) throw new DoesntExistException("Couldn't start ride: The car with id '" + carId + " doesn't exist");
@@ -269,5 +276,11 @@ public class CarService {
 
         //Return to client
         return carRepository.save(car);
+    }
+
+    public Car endRide(String userId, long carId) {
+        //Get the requested car
+        Car car = carRepository.findById(carId).orElse(null);
+        if (car==null) throw new DoesntExistException("Couldn't end ride: The car with id '" + carId + " doesn't exist");
     }
 }

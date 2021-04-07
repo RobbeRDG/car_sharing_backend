@@ -3,10 +3,7 @@ package be.kul.carservice.controller.amqp;
 import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.amqp.RabbitMQConfig;
 import be.kul.carservice.utils.exceptions.CarOfflineException;
-import be.kul.carservice.utils.json.jsonObjects.CarAcknowledgement;
-import be.kul.carservice.utils.json.jsonObjects.CarLockRequest;
-import be.kul.carservice.utils.json.jsonObjects.CarRideRequest;
-import be.kul.carservice.utils.json.jsonObjects.RideInitialisation;
+import be.kul.carservice.utils.json.jsonObjects.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.BindingBuilder;
@@ -116,5 +113,17 @@ public class AmqpProducerController {
         //Convert json to CarAcknowledgement
         CarAcknowledgement ack = objectMapper.readValue(response, CarAcknowledgement.class);
         return ack;
+    }
+
+    public void sendRideWaypoint(RideWaypoint rideWaypoint) throws JsonProcessingException {
+        //Convert CarStateUpdate to json
+        String rideWaypointString = objectMapper.writeValueAsString(rideWaypoint);
+
+        //Send the RideInitialisationString to the ride service
+        internalRabbitTemplate.convertAndSend(
+                RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
+                RabbitMQConfig.RIDE_WAYPOINT_BINDING_KEY,
+                rideWaypointString
+        );
     }
 }
