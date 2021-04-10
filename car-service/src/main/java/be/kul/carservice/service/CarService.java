@@ -4,17 +4,22 @@ import be.kul.carservice.controller.amqp.AmqpProducerController;
 import be.kul.carservice.entity.Car;
 import be.kul.carservice.entity.Reservation;
 import be.kul.carservice.entity.Ride;
+import be.kul.carservice.entity.User;
 import be.kul.carservice.repository.CarRepository;
 import be.kul.carservice.repository.ReservationRepository;
 import be.kul.carservice.repository.RideRepository;
+import be.kul.carservice.repository.UserRepository;
 import be.kul.carservice.utils.exceptions.*;
-import be.kul.carservice.utils.helperObjects.RideState;
-import be.kul.carservice.utils.json.jsonObjects.*;
+import be.kul.carservice.utils.helperObjects.PaymentMethodStatusEnum;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.*;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.payment.PaymentMethodStatusUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
@@ -33,6 +38,9 @@ public class CarService {
     private CarRepository carRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ReservationRepository reservationRepository;
 
     @Autowired
@@ -48,7 +56,7 @@ public class CarService {
         }
 
         //Set the latestStateUpdate to now
-        car.setLastStateUpdateTimestamp(new Timestamp(System.currentTimeMillis()));
+        car.setLastStateUpdate(new Timestamp(System.currentTimeMillis()));
         logger.info("Car with numberplate '" +car.getNumberPlate() + "' created");
         return carRepository.save(car);
     }
@@ -76,7 +84,7 @@ public class CarService {
         //Set the latestStateUpdate of each car to now
         Timestamp now = new Timestamp(System.currentTimeMillis());
         for(Car car: carList) {
-            car.setLastStateUpdateTimestamp(now);
+            car.setLastStateUpdate(now);
         }
 
         logger.info("Multiple cars created");
@@ -95,13 +103,13 @@ public class CarService {
     public Car updateCarState(CarStateUpdate stateUpdate) throws JsonProcessingException {
         long carId = stateUpdate.getCarId();
         Car car = carRepository.findById(carId).orElse(null);
-        if (car==null) throw new DoesntExistException("The car with id '" + carId + "' doesn't exist");
+        if (car==null) throw new DoesntExistException("Couldn't update car state: The car with id '" + carId + "' doesn't exist");
 
         //Update car parameters
         car.setRemainingFuelInKilometers(stateUpdate.getRemainingFuelInKilometers());
         car.setLocation(stateUpdate.getLocation());
         car.setOnline(stateUpdate.isOnline());
-        car.setLastStateUpdateTimestamp(stateUpdate.getCreatedOn());
+        car.setLastStateUpdate(stateUpdate.getCreatedOn());
 
         //If the car is in a ride send waypoint to ride service
         if (car.getCurrentRide()!=null) {
@@ -129,9 +137,6 @@ public class CarService {
 
         //Create a new reservation
         Reservation reservation = new Reservation(userId, car);
-
-        //Save the reservation
-        reservationRepository.save(reservation);
 
         //Set the reservation state of the car
         car.setCurrentReservation(reservation);
@@ -195,7 +200,15 @@ public class CarService {
         return carRepository.save(car);
     }
 
+    @Transactional(dontRollbackOn = {DoesntExistException.class, NotAvailableException.class, RequestDeniedException.class})
     public Car startRide(String userId, long carId) throws Exception {
+        //Check if the user has a valid paymentMethod
+        User user = userRepository.findById(userId).orElse(null);
+        if (user==null) throw new DoesntExistException("Couldn't start ride: The user with id '" + carId + " doesn't exist");
+        if (!user.getPaymentMethodStatus().equals(PaymentMethodStatusEnum.VALID)) throw new NotAllowedException(
+                "Couldn't start ride: The user with id '" + carId + " doesn't have a valid payment methode"
+        );
+
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
         if (car==null) throw new DoesntExistException("Couldn't start ride: The car with id '" + carId + " doesn't exist");
@@ -207,49 +220,56 @@ public class CarService {
         //Create a new ride
         Ride ride = new Ride(userId, car);
 
-        //Save the new ride
-        rideRepository.save(ride);
-
         //Send a ride request to the car and wait for response
         CarRideRequest rideRequest = new CarRideRequest(ride);
         CarAcknowledgement ack;
         try {
-            ack = amqpProducerController.sendCarRideRequest(rideRequest);
+            ack = amqpProducerController.sendBlockingCarRequest(rideRequest);
         } catch(CarOfflineException e) {
-            handleCarOfflineException(carId);
+            handleCarOfflineOnStartRide(car, ride);
             throw e;
         }
 
         //Check if the acknowledgement confirms the ride request
-        if(ack.confirmsRideRequest(rideRequest)) throw new NotAvailableException(
-                "Couldn't start ride: The car with id '" + carId + "' can't be ridden now");
-
-        //Set the ride state to IN_PROGRESS
-        ride.setCurrentState(RideState.IN_PROGRESS);
+        if(!ack.confirmsRequest(rideRequest)) {
+            handleRequestDeniedOnStartRide(ride);
+            throw new RequestDeniedException(
+                    "Couldn't start ride: The car with id '" + carId + "' has denied the ride request: " + ack.getErrorMessage());
+        }
 
         //Set the new car state
         car.setCurrentRide(ride);
+
+        //Start the ride
+        car.getCurrentRide().start();
 
         //Send a RideInitialisation to the ride service
         RideInitialisation rideInitialisation = new RideInitialisation(ride);
         amqpProducerController.sendRideInitialisation(rideInitialisation);
 
+
         //Return the new car state
         return carRepository.save(car);
     }
 
-    private void handleCarOfflineException(long carId) throws Exception {
-        //Get the not-responding car
-        Car car = carRepository.findById(carId).orElse(null);
-        if (car==null) throw new Exception("Couldn't handle offlineException: The car with id '" + carId + " doesn't exist");
+    private void handleRequestDeniedOnStartRide(Ride ride) {
+        //Cancel the new ride
+        ride.cancel();
+
+        //Save the ride state
+        rideRepository.save(ride);
+    }
+
+    private void handleCarOfflineOnStartRide(Car car, Ride ride) throws Exception {
+        //Cancel the new ride
+        ride.cancel();
 
         //Set the new state not-responding car
         car.setOnline(false);
-        car.setLastStateUpdateTimestamp(new Timestamp(System.currentTimeMillis()));
-        car.getCurrentRide().setCurrentState(RideState.CANCELED);
 
-        //Save the car state
+        //Save the car and ride state
         carRepository.save(car);
+        rideRepository.save(ride);
     }
 
     public Car lockCar(String userId, long carId, boolean lock) throws JsonProcessingException {
@@ -258,18 +278,16 @@ public class CarService {
         if (car==null) throw new DoesntExistException("Couldn't lock car: The car with id '" + carId + " doesn't exist");
 
         //Check if the user is currently riding the requested car
-        if (!car.getCurrentRide().getUserId().equals(userId)) throw new NotAllowedException(
+        if (!car.isRiddenBy(userId)) throw new NotAllowedException(
                 "Couldn't lock/unlock car: Cars can only be locked when the user is currently riding the car");
 
-        //Create a CarLockRequest
+        //Create a CarLockRequest and send the request to the car
         CarLockRequest carLockRequest = new CarLockRequest(car.getCurrentRide().getRideId(), carId, true);
-
-        //Send the request to the car
-        CarAcknowledgement ack = amqpProducerController.sendCarLockRequest(carLockRequest);
+        CarAcknowledgement ack = amqpProducerController.sendBlockingCarRequest(carLockRequest);
 
         //Check if the acknowledgement confirms the lockrequest
-        if(ack.confirmsLockRequest(carLockRequest)) throw new NotAvailableException(
-                "Couldn't lock/unlock car: The car with id '" + carId + "' can't be locked/unlocked now");
+        if(!ack.confirmsRequest(carLockRequest)) throw new RequestDeniedException(
+                "Couldn't lock/unlock car: The car with id '" + carId + "' has denied the lock request: " + ack.getErrorMessage());
 
         //Set the car door state
         car.setCarDoorsLocked(lock);
@@ -278,9 +296,44 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    public Car endRide(String userId, long carId) {
+    @Transactional(dontRollbackOn = {DoesntExistException.class, RequestDeniedException.class, NotAllowedException.class})
+    public Car endRide(String userId, long carId) throws JsonProcessingException {
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
-        if (car==null) throw new DoesntExistException("Couldn't end ride: The car with id '" + carId + " doesn't exist");
+        if (car==null) throw new DoesntExistException(
+                "Couldn't end ride: The car with id '" + carId + " doesn't exist");
+
+        //Check if the user is currently riding the requested car
+        if (!car.isBeingRidden() || !car.isRiddenBy(userId)) throw new NotAllowedException(
+                "Couldn't end ride: User is not currently riding the requested car");
+
+        //Create a EndRideRequest and send the request to the car
+        CarEndRideRequest endRideRequest = new CarEndRideRequest(car.getCurrentRide());
+        CarAcknowledgement ack = amqpProducerController.sendBlockingCarRequest(endRideRequest);
+
+
+        //Check if the acknowledgement confirms the EndRideRequest
+        if(!ack.confirmsRequest(endRideRequest)) throw new RequestDeniedException(
+                "Couldn't end ride: The car with id '" + carId + "' has denied the end ride request: " + ack.getErrorMessage());
+
+        //End the ride
+        car.getCurrentRide().end();
+
+        //send the rideStateUpdate to the ride service
+        RideEnd rideEnd = new RideEnd(car.getCurrentRide());
+        amqpProducerController.sendRideEnd(rideEnd);
+
+        //return to client
+        return carRepository.save(car);
+    }
+
+    public void updatePaymentMethodStatus(PaymentMethodStatusUpdate paymentMethodStatusUpdate) {
+        String userId = paymentMethodStatusUpdate.getUserId();
+
+        //Check if the user has a valid paymentMethod
+        User user = userRepository.findById(userId).orElse(null);
+        if (user==null) throw new DoesntExistException("Couldn't update payment method status:  The user with id '" + userId + " doesn't exist");
+
+        userRepository.save(user);
     }
 }

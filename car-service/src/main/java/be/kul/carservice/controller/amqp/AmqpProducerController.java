@@ -3,7 +3,11 @@ package be.kul.carservice.controller.amqp;
 import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.amqp.RabbitMQConfig;
 import be.kul.carservice.utils.exceptions.CarOfflineException;
-import be.kul.carservice.utils.json.jsonObjects.*;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarAcknowledgement;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarRequest;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.BindingBuilder;
@@ -12,6 +16,7 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -36,33 +41,8 @@ public class AmqpProducerController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public CarAcknowledgement sendCarRideRequest(CarRideRequest carRideRequest) throws JsonProcessingException, CarOfflineException {
-        //Dynamicaly generate the new queue for the selected car
-        String carIdString = carRideRequest.getCarIdString();
-        String queueName = "rideRequest." + carIdString;
-        String bindingKey = "external.cars.rideRequest." + carIdString;
-        generateCarQueue(queueName, bindingKey);
-
-        //Convert carRideRequest to json
-        String carRideRequestString = objectMapper.writeValueAsString(carRideRequest);
-
-        //Send the request and wait for response
-        String response;
-        try {
-            response = (String) externalRabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfig.SERVER_TO_CARS_EXCHANGE,
-                    bindingKey,
-                    carRideRequestString
-            );
-            if (response==null) throw new NullPointerException();
-        } catch (NullPointerException e) {
-            throw new CarOfflineException("Can't ride the car: The car with id '" + carIdString + "' seems to be offline");
-        }
-
-        //Convert json to CarAcknowledgement
-        CarAcknowledgement ack = objectMapper.readValue(response, CarAcknowledgement.class);
-        return ack;
-    }
+    @Value("${spring.configurations.carRequest.expirationTimeInMilliseconds}")
+    private int expirationTimeInMilliseconds;
 
     private void generateCarQueue(String queueName, String bindingKey) {
         externalRabbitAdmin.declareExchange(new TopicExchange(RabbitMQConfig.SERVER_TO_CARS_EXCHANGE));
@@ -71,7 +51,35 @@ public class AmqpProducerController {
                 BindingBuilder.bind(new Queue(queueName))
                         .to(new TopicExchange(RabbitMQConfig.SERVER_TO_CARS_EXCHANGE))
                         .with(bindingKey));
-        externalRabbitTemplate.setReplyTimeout(3000);
+        externalRabbitTemplate.setReplyTimeout(expirationTimeInMilliseconds);
+    }
+
+    public <T extends CarRequest> CarAcknowledgement sendBlockingCarRequest(T request) throws JsonProcessingException {
+        //Dynamicaly generate the new queue for the selected car
+        String carIdString = request.getCarIdString();
+        String queueName = request.getRequestType() + "." + carIdString;
+        String bindingKey = "external.cars." + request.getRequestType() + "." + carIdString;
+        generateCarQueue(queueName, bindingKey);
+
+        //Convert request to json
+        String carRequestString = objectMapper.writeValueAsString(request);
+
+        //Send the request and wait for response
+        String response;
+        try {
+            response = (String) externalRabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfig.SERVER_TO_CARS_EXCHANGE,
+                    bindingKey,
+                    carRequestString
+            );
+            if (response==null) throw new NullPointerException();
+        } catch (NullPointerException e) {
+            throw new CarOfflineException("Can't lock/unlock the car: The car with id '" + carIdString + "' seems to be offline");
+        }
+
+        //Convert json to CarAcknowledgement
+        CarAcknowledgement ack = objectMapper.readValue(response, CarAcknowledgement.class);
+        return ack;
     }
 
     public void sendRideInitialisation(RideInitialisation rideInitialisation) throws JsonProcessingException {
@@ -87,34 +95,6 @@ public class AmqpProducerController {
 
     }
 
-    public CarAcknowledgement sendCarLockRequest(CarLockRequest carLockRequest) throws JsonProcessingException {
-        //Dynamicaly generate the new queue for the selected car
-        String carIdString = carLockRequest.getCarIdString();
-        String queueName = "lockRequest." + carIdString;
-        String bindingKey = "external.cars.lockRequest." + carIdString;
-        generateCarQueue(queueName, bindingKey);
-
-        //Convert CarLockRequest to json
-        String carRideRequestString = objectMapper.writeValueAsString(carLockRequest);
-
-        //Send the request and wait for response
-        String response;
-        try {
-            response = (String) externalRabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfig.SERVER_TO_CARS_EXCHANGE,
-                    bindingKey,
-                    carRideRequestString
-            );
-            if (response==null) throw new NullPointerException();
-        } catch (NullPointerException e) {
-            throw new CarOfflineException("Can't lock/unlock the car: The car with id '" + carIdString + "' seems to be offline");
-        }
-
-        //Convert json to CarAcknowledgement
-        CarAcknowledgement ack = objectMapper.readValue(response, CarAcknowledgement.class);
-        return ack;
-    }
-
     public void sendRideWaypoint(RideWaypoint rideWaypoint) throws JsonProcessingException {
         //Convert CarStateUpdate to json
         String rideWaypointString = objectMapper.writeValueAsString(rideWaypoint);
@@ -126,4 +106,18 @@ public class AmqpProducerController {
                 rideWaypointString
         );
     }
+
+    public void sendRideEnd(RideEnd rideEnd) throws JsonProcessingException {
+        //Convert RideEnd to json
+        String rideEndString = objectMapper.writeValueAsString(rideEnd);
+
+        //Send the RideInitialisationString to the ride service
+        internalRabbitTemplate.convertAndSend(
+                RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
+                RabbitMQConfig.RIDE_END_BINDING_KEY,
+                rideEndString
+        );
+    }
+
+
 }

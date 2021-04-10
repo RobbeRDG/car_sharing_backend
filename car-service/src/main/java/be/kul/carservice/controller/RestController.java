@@ -2,9 +2,10 @@ package be.kul.carservice.controller;
 
 import be.kul.carservice.entity.Car;
 import be.kul.carservice.service.CarService;
-import be.kul.carservice.utils.json.jsonObjects.CarStateUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStateUpdate;
 import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -47,7 +48,7 @@ public class RestController {
     public @ResponseBody Car updateCarState(
             @RequestBody CarStateUpdate stateUpdate,
             @PathVariable long carId
-    ) {
+    ) throws JsonProcessingException {
         stateUpdate.setCarId(carId);
         return carService.updateCarState(stateUpdate);
     }

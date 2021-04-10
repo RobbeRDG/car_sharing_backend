@@ -1,9 +1,10 @@
-package be.kul.carservice.utils.json.jsonObjects;
+package be.kul.carservice.utils.json.jsonObjects.amqpMessages.car;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.locationtech.jts.geom.Point;
@@ -13,8 +14,9 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
 @Setter
 public class CarStateUpdate implements Serializable {
     @JsonIgnore

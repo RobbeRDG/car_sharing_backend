@@ -17,8 +17,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().csrf().disable()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/car-service/cars/available").permitAll()
-                .antMatchers(HttpMethod.POST, "/car-service/cars").hasAuthority("SCOPE_car:service:add_car")
-                .antMatchers(HttpMethod.POST, "/car-service/cars/batch").hasAuthority("SCOPE_car:service:add_car")
                 .antMatchers("/**").hasAuthority("SCOPE_car:service")
                 .antMatchers("/admin/**").hasAuthority("SCOPE_administration")
                 .anyRequest().authenticated()

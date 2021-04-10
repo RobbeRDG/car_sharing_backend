@@ -1,6 +1,6 @@
 package be.kul.carservice.entity;
 
-import be.kul.carservice.utils.helperObjects.RideState;
+import be.kul.carservice.utils.helperObjects.RideStateEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,11 +39,13 @@ public class Ride {
 
     @NotNull
     private Timestamp createdOn;
+    private Timestamp startedOn;
+    private Timestamp finishedOn;
     @NotNull
     private Timestamp lastStateUpdate;
     @NotNull
     @Enumerated(EnumType.STRING)
-    private RideState currentState;
+    private RideStateEnum currentState;
 
 
     public Ride(@NotNull String userId, @NotNull Car car) {
@@ -51,8 +53,8 @@ public class Ride {
         this.car = car;
         Timestamp now = new Timestamp(System.currentTimeMillis());
         this.createdOn = now;
-        this.lastStateUpdate = now;
-        this.currentState = RideState.WAITING_FOR_CAR_ACKNOWLEDGEMENT;
+        this.lastStateUpdate= now;
+        this.currentState = RideStateEnum.WAITING_FOR_CAR_ACKNOWLEDGEMENT;
     }
 
     public long getRideId() {
@@ -71,12 +73,39 @@ public class Ride {
         return createdOn;
     }
 
-    public RideState getCurrentState() {
+    public RideStateEnum getCurrentState() {
         return currentState;
     }
 
+    public Timestamp getStartedOn() {
+        return startedOn;
+    }
 
-    public void setCurrentState(RideState currentState) {
-        this.currentState = currentState;
+    public Timestamp getFinishedOn() {
+        return finishedOn;
+    }
+
+    public Timestamp getLastStateUpdate() {
+        return lastStateUpdate;
+    }
+
+    public void start() {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        this.startedOn = now;
+        this.currentState = RideStateEnum.IN_PROGRESS;
+        this.lastStateUpdate= now;
+    }
+
+    public void end() {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        this.finishedOn = now;
+        this.currentState = RideStateEnum.FINISHED;
+        this.lastStateUpdate= now;
+    }
+
+    public void cancel() {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        this.currentState = RideStateEnum.CANCELED;
+        this.lastStateUpdate= now;
     }
 }

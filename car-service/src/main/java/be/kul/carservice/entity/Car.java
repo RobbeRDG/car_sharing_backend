@@ -65,7 +65,7 @@ public class Car {
     //Car state
     @NotNull
     @JsonView(Views.CarView.Full.class)
-    private Timestamp lastStateUpdateTimestamp;
+    private Timestamp lastStateUpdate;
     @NotNull
     @JsonView(Views.CarView.Full.class)
     private boolean online; //If the car is online
@@ -86,11 +86,11 @@ public class Car {
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     @JsonView(Views.CarView.Basic.class)
     private Point location;
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "reservation_id")
     @JsonView(Views.CarView.Reserved.class)
     private Reservation currentReservation;
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ride_id")
     @JsonView(Views.CarView.Ride.class)
     private Ride currentRide;
@@ -139,8 +139,8 @@ public class Car {
         this.online = online;
     }
 
-    public void setLastStateUpdateTimestamp(Timestamp lastStateUpdateTimestamp) {
-        this.lastStateUpdateTimestamp = lastStateUpdateTimestamp;
+    public void setLastStateUpdate(Timestamp timestamp) {
+        this.lastStateUpdate = timestamp;
     }
 
     public boolean canBeRidden(String userId) {
@@ -164,6 +164,16 @@ public class Car {
     }
 
     public void setCarDoorsLocked(boolean lock) {
+        new Timestamp(System.currentTimeMillis());
         carDoorsLocked=lock;
     }
+
+    public boolean isRiddenBy(String userId) {
+        return currentRide.getUserId().equals(userId);
+    }
+
+    public boolean isBeingRidden() {
+        return currentRide!=null;
+    }
+
 }

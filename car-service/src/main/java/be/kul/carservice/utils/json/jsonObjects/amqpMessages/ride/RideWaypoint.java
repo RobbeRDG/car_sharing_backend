@@ -1,26 +1,34 @@
-package be.kul.carservice.utils.json.jsonObjects;
+package be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.AmqpMessage;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStateUpdate;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.locationtech.jts.geom.Point;
 import org.n52.jackson.datatype.jts.GeometryDeserializer;
 import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import java.sql.Timestamp;
 
-public class RideWaypoint {
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class RideWaypoint extends AmqpMessage {
     private long rideId;
-    private long carId;
-    private Timestamp createdOn;
     @JsonSerialize( using = GeometrySerializer.class)
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     private Point location;
+    private Timestamp time;
 
     public RideWaypoint(CarStateUpdate carStateUpdate, long rideId) {
+        super();
         this.rideId=rideId;
-        carId=carStateUpdate.getCarId();
-        createdOn=carStateUpdate.getCreatedOn();
+        time=carStateUpdate.getCreatedOn();
         location=carStateUpdate.getLocation();
     }
 }

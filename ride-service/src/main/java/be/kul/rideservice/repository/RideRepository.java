@@ -1,8 +1,28 @@
 package be.kul.rideservice.repository;
 
+import be.kul.rideservice.entity.Ride;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Date;
+import java.util.List;
 
 @Repository
 public interface RideRepository extends JpaRepository<Ride, Long> {
+    @Query(value = "SELECT * " +
+            "FROM rides.ride as r " +
+            "WHERE r.started_on between :startDate and :stopDate "
+            , nativeQuery = true)
+    List<Ride> adminGetAllRidesWithinTimeFrame(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
+
+    @Query(value = "SELECT * " +
+            "FROM rides.ride as r " +
+            "WHERE r.started_on between :startDate and :stopDate and r.user_id = :userId "
+            , nativeQuery = true)
+    List<Ride> getAllRidesWithinTimeFrame(@Param("userId") String userId, @Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
+
+
+
 }
