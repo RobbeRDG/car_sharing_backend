@@ -1,7 +1,9 @@
 package be.kul.carservice.entity;
 
 import be.kul.carservice.utils.helperObjects.RideStateEnum;
+import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,8 +30,10 @@ public class Ride {
                     @Parameter(name = "increment_size", value = "1")
             }
     )
+    @JsonView(Views.CarView.Ride.class)
     private long rideId;
     @NotNull
+    @JsonView(Views.CarView.Ride.class)
     private String userId;
     @NotNull
     @JsonIgnore
@@ -38,13 +42,18 @@ public class Ride {
     private Car car;
 
     @NotNull
+    @JsonView(Views.CarView.Ride.class)
     private Timestamp createdOn;
+    @JsonView(Views.CarView.Ride.class)
     private Timestamp startedOn;
+    @JsonView(Views.CarView.Ride.class)
     private Timestamp finishedOn;
     @NotNull
+    @JsonView(Views.CarView.Ride.class)
     private Timestamp lastStateUpdate;
     @NotNull
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.CarView.Ride.class)
     private RideStateEnum currentState;
 
 
