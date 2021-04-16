@@ -14,6 +14,7 @@ public class RabbitMQConfig {
     public static final String SERVER_TO_SERVER_EXCHANGE = "serverToServer";
     public static final String RIDE_SERVICE_DLQ = "rideServiceDLQ";
     public static final String RIDE_SERVICE_DLQ_BINDING_KEY = "rideService.dlq";
+    public static final String BILLING_SERVICE_DLQ_BINDING_KEY = "billingService.dlq";
     public static final String RIDE_INITIALISATION_QUEUE = "rideInitialisation";
     public static final String RIDE_INITIALISATION_BINDING_KEY = "rideService.rides.new.*";
     public static final String RIDE_WAYPOINT_QUEUE = "rideWaypoint";
@@ -85,6 +86,7 @@ public class RabbitMQConfig {
                 .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
                 .build();
     }
+
     @Bean
     public Queue rideInitialisationQueue() {
         return QueueBuilder
@@ -116,6 +118,8 @@ public class RabbitMQConfig {
     public Queue billInitialisationQueue() {
         return QueueBuilder
                 .durable(BILL_INITIALISATION_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(BILLING_SERVICE_DLQ_BINDING_KEY)
                 .build();
     }
 

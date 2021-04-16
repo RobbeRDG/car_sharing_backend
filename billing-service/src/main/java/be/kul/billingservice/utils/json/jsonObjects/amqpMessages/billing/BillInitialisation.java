@@ -1,4 +1,4 @@
-package be.kul.billingservice.utils.json.jsonObjects.amqpMessages.payment;
+package be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,8 +16,8 @@ public class BillInitialisation {
     private long rideId;
     private long carId;
     private String userId;
-    private Timestamp startedOn;
-    private Timestamp finishedOn;
+    private LocalDateTime startedOn;
+    private LocalDateTime finishedOn;
 
     public long getRideId() {
         return rideId;
@@ -30,11 +31,11 @@ public class BillInitialisation {
         return userId;
     }
 
-    public Timestamp getStartedOn() {
+    public LocalDateTime getStartedOn() {
         return startedOn;
     }
 
-    public Timestamp getFinishedOn() {
+    public LocalDateTime getFinishedOn() {
         return finishedOn;
     }
 }

@@ -12,10 +12,12 @@ import javax.annotation.Resource;
 @Configuration
 public class RabbitMQConfig {
     public static final String SERVER_TO_SERVER_EXCHANGE = "serverToServer";
+    public static final String BILLING_SERVICE_DLQ = "billingServiceDLQ";
+    public static final String BILLING_SERVICE_DLQ_BINDING_KEY = "billingService.dlq";
     public static final String BILL_INITIALISATION_QUEUE = "billInitialisation";
     public static final String BILL_INITIALISATION_BINDING_KEY = "paymentService.bill.new.*";
-    public static final String USER_ADD_QUEUE = "addUser";
-    public static final String USER_ADD_BINDING_KEY = "paymentService.user.new.*";
+    public static final String USER_PAYMENT_METHOD_UPDATE_QUEUE = "userPaymentMethodUpdate";
+    public static final String USER_PAYMENT_METHOD_UPDATE_BINDING_KEY = "carService.userPaymentMethod.update.*";
 
 
     @Resource(name="internalRabbitAdmin")
@@ -24,26 +26,61 @@ public class RabbitMQConfig {
 
     @PostConstruct
     public void RabbitInit() {
-        //Payment initialisation
-        internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(BILL_INITIALISATION_QUEUE));
+        TopicExchange serverToServer = new TopicExchange(SERVER_TO_SERVER_EXCHANGE);
+        //DLQ
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(billingServiceDLQ());
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(BILL_INITIALISATION_QUEUE))
-                        .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
+                BindingBuilder.bind(billingServiceDLQ())
+                        .to(serverToServer)
+                        .with(BILLING_SERVICE_DLQ_BINDING_KEY));
+
+        //Payment initialisation
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(billInitialisationQueue());
+        internalRabbitAdmin.declareBinding(
+                BindingBuilder.bind(billInitialisationQueue())
+                        .to(serverToServer)
                         .with(BILL_INITIALISATION_BINDING_KEY));
 
-        //Add new user
-        internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(USER_ADD_QUEUE));
+        //User payment method update
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(userPaymentMethodUpdateQueue());
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(USER_ADD_QUEUE))
-                        .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
-                        .with(USER_ADD_BINDING_KEY));
+                BindingBuilder.bind(userPaymentMethodUpdateQueue())
+                        .to(serverToServer)
+                        .with(USER_PAYMENT_METHOD_UPDATE_BINDING_KEY));
     }
 
     @Bean
     public AmqpConsumerController amqpController() {
         return new AmqpConsumerController();
+    }
+
+    @Bean
+    Queue billingServiceDLQ() {
+        return QueueBuilder
+                .durable(BILLING_SERVICE_DLQ)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .build();
+    }
+
+    @Bean
+    public Queue billInitialisationQueue() {
+        return QueueBuilder
+                .durable(BILL_INITIALISATION_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(BILLING_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue userPaymentMethodUpdateQueue() {
+        return QueueBuilder
+                .durable(USER_PAYMENT_METHOD_UPDATE_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(BILLING_SERVICE_DLQ_BINDING_KEY)
+                .build();
     }
 
 }

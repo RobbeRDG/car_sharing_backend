@@ -7,7 +7,7 @@ import be.kul.rideservice.repository.RideRepository;
 import be.kul.rideservice.repository.WaypointRepository;
 import be.kul.rideservice.utils.exceptions.DoesntExistException;
 import be.kul.rideservice.utils.exceptions.NotAllowedException;
-import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.payment.BillInitialisation;
+import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;

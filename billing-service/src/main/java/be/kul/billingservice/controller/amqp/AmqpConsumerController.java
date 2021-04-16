@@ -2,7 +2,7 @@ package be.kul.billingservice.controller.amqp;
 
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.amqp.RabbitMQConfig;
-import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.payment.BillInitialisation;
+import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

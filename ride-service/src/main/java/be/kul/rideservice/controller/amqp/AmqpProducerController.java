@@ -2,7 +2,7 @@ package be.kul.rideservice.controller.amqp;
 
 import be.kul.rideservice.service.RideService;
 import be.kul.rideservice.utils.amqp.RabbitMQConfig;
-import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.payment.BillInitialisation;
+import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;

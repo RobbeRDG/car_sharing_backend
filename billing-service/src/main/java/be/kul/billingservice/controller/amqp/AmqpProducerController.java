@@ -1,7 +1,8 @@
 package be.kul.billingservice.controller.amqp;
 
+import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.amqp.RabbitMQConfig;
-import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.payment.BillInitialisation;
+import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodUpdate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -20,22 +21,21 @@ public class AmqpProducerController {
     private RabbitAdmin internalRabbitAdmin;
 
     @Autowired
-    RideService rideService;
+    BillingService billingService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendPaymentInitialisation(BillInitialisation billInitialisation) throws JsonProcessingException {
-        //Convert paymentInitialisation to json
-        String paymentInitialisationString = objectMapper.writeValueAsString(billInitialisation);
+    public void sendUserPaymentMethodUpdate(UserPaymentMethodUpdate userPaymentMethodUpdate) throws JsonProcessingException {
+        //Convert userPaymentMethodUpdate to json
+        String userPaymentMethodUpdateString = objectMapper.writeValueAsString(userPaymentMethodUpdate);
 
         //Send the paymentInitialisationString to the payment service
         internalRabbitTemplate.convertAndSend(
                 RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
-                RabbitMQConfig.PAYMENT_INITIALISATION_BINDING_KEY,
-                paymentInitialisationString
+                RabbitMQConfig.USER_PAYMENT_METHOD_UPDATE_BINDING_KEY,
+                userPaymentMethodUpdateString
         );
     }
-
 
 }

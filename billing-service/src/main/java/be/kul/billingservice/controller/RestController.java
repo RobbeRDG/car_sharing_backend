@@ -3,6 +3,7 @@ package be.kul.billingservice.controller;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +23,7 @@ public class RestController {
     public @ResponseBody
     ResponseEntity<String> configureNewPaymentMethod(
             @AuthenticationPrincipal Jwt principal
-    ){
+    ) throws JsonProcessingException {
         String userId = principal.getClaimAsString("sub");
         return billingService.configureNewPaymentMethod(userId);
     }
