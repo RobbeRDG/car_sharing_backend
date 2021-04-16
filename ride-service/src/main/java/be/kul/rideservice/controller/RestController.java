@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @org.springframework.web.bind.annotation.RestController
+@RequestMapping(path="/ride-service")
 public class RestController {
     @Autowired
     private RideService rideService;

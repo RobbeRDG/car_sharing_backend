@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +16,9 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class User {
+    @Id
     private String userId;
+    @NotNull
     private PaymentMethodStatusEnum paymentMethodStatus;
 
     public PaymentMethodStatusEnum getPaymentMethodStatus() {

@@ -6,9 +6,9 @@ public class Views {
         }
         public static interface Reserved extends Basic {
         }
-        public static interface Ride extends Basic {
+        public static interface Ride extends Reserved {
         }
-        public static interface Full extends Reserved,Ride {
+        public static interface Full extends Ride {
         }
     }
 

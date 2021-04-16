@@ -3,6 +3,11 @@ package be.kul.rideservice.entity;
 import be.kul.rideservice.utils.helperObjects.RideStateEnum;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.messaging.handler.annotation.SendTo;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -10,6 +15,10 @@ import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 public class Ride {
     @Id

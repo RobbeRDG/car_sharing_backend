@@ -1,4 +1,4 @@
-package be.kul.rideservice.utils.json.jsonObjects.amqpMessages;
+package be.kul.billingservice.utils.json.jsonObjects.amqpMessages;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.sql.Timestamp;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class AmqpMessage {

@@ -25,6 +25,8 @@ public class AmqpConsumerController {
         //get the rideCreation object from the string
         RideInitialisation rideCreation = objectMapper.readValue(rideInitialisationString, RideInitialisation.class);
 
+        RideService.logger.info(rideInitialisationString);
+
         //Handle the ride initialisation
         rideService.addRide(rideCreation);
     }

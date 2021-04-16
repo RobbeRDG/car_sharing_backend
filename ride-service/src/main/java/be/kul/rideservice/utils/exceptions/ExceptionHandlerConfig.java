@@ -1,6 +1,5 @@
-package be.kul.carservice.utils.exceptions;
+package be.kul.rideservice.utils.exceptions;
 
-import be.kul.carservice.service.CarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -13,15 +12,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
-    Logger logger = LoggerFactory.getLogger(CarService.class);
+    Logger logger = LoggerFactory.getLogger(ExceptionHandlerConfig.class);
 
     @ExceptionHandler(value = {
-            AlreadyExistsException.class,
+            IllegalArgumentException.class,
             DoesntExistException.class,
-            NotAvailableException.class,
-            ReservationCooldownException.class,
-            CarOfflineException.class,
-            NotAllowedException.class
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();

@@ -18,8 +18,8 @@ public class RabbitMQConfig {
     public static final String RIDE_WAYPOINT_BINDING_KEY = "rideService.rides.waypoint.*";
     public static final String RIDE_END_QUEUE = "rideEnd";
     public static final String RIDE_END_BINDING_KEY = "rideService.rides.end.*";
-    public static final String PAYMENT_INITIALISATION_QUEUE = "paymentInitialisation";
-    public static final String PAYMENT_INITIALISATION_BINDING_KEY = "paymentService.payment.new.*";
+    public static final String BILL_INITIALISATION_QUEUE = "billInitialisation";
+    public static final String BILL_INITIALISATION_BINDING_KEY = "paymentService.bill.new.*";
 
 
     @Resource(name="internalRabbitAdmin")
@@ -54,11 +54,11 @@ public class RabbitMQConfig {
 
         //Payment initialisation
         internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(PAYMENT_INITIALISATION_QUEUE));
+        internalRabbitAdmin.declareQueue(new Queue(BILL_INITIALISATION_QUEUE));
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(PAYMENT_INITIALISATION_QUEUE))
+                BindingBuilder.bind(new Queue(BILL_INITIALISATION_QUEUE))
                         .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
-                        .with(PAYMENT_INITIALISATION_BINDING_KEY));
+                        .with(BILL_INITIALISATION_BINDING_KEY));
     }
 
     @Bean

@@ -7,6 +7,7 @@ import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -90,8 +91,8 @@ public class RestController {
     }
 
     @PutMapping("/cars/end-ride/{carId}")
-    @JsonView(Views.CarView.Ride.class)
-    public @ResponseBody Car endRide(
+    public @ResponseBody
+    ResponseEntity<String> endRide(
             @AuthenticationPrincipal Jwt principal,
             @PathVariable long carId
     ) throws Exception {

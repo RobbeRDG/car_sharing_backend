@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CarRideRequest extends CarRequest {
-    private static final String REQUEST_TYPE = "CarRideRequest";
+    private static final String REQUEST_TYPE = CarRideRequest.class.getSimpleName();
     private long rideId;
 
     public CarRideRequest(Ride ride) {

@@ -1,5 +1,6 @@
 package be.kul.carservice.controller.amqp;
 
+import be.kul.carservice.entity.Car;
 import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.amqp.RabbitMQConfig;
 import be.kul.carservice.utils.exceptions.CarOfflineException;
@@ -11,6 +12,7 @@ import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -20,6 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class AmqpProducerController {
@@ -45,16 +49,18 @@ public class AmqpProducerController {
     private int expirationTimeInMilliseconds;
 
     private void generateCarQueue(String queueName, String bindingKey) {
-        externalRabbitAdmin.declareExchange(new TopicExchange(RabbitMQConfig.SERVER_TO_CARS_EXCHANGE));
-        externalRabbitAdmin.declareQueue(new Queue(queueName));
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-message-ttl", expirationTimeInMilliseconds);
+
+        externalRabbitAdmin.declareExchange(new DirectExchange(RabbitMQConfig.SERVER_TO_CARS_EXCHANGE, true, false));
+        externalRabbitAdmin.declareQueue(new Queue(queueName, true, false, false, args));
         externalRabbitAdmin.declareBinding(
                 BindingBuilder.bind(new Queue(queueName))
-                        .to(new TopicExchange(RabbitMQConfig.SERVER_TO_CARS_EXCHANGE))
+                        .to(new DirectExchange(RabbitMQConfig.SERVER_TO_CARS_EXCHANGE))
                         .with(bindingKey));
-        externalRabbitTemplate.setReplyTimeout(expirationTimeInMilliseconds);
     }
 
-    public <T extends CarRequest> CarAcknowledgement sendBlockingCarRequest(T request) throws JsonProcessingException {
+    public <T extends CarRequest> CarAcknowledgement sendBlockingCarRequest(T request) throws JsonProcessingException, CarOfflineException {
         //Dynamicaly generate the new queue for the selected car
         String carIdString = request.getCarIdString();
         String queueName = request.getRequestType() + "." + carIdString;
@@ -72,6 +78,7 @@ public class AmqpProducerController {
                     bindingKey,
                     carRequestString
             );
+            CarService.logger.info(response);
             if (response==null) throw new NullPointerException();
         } catch (NullPointerException e) {
             throw new CarOfflineException("Can't lock/unlock the car: The car with id '" + carIdString + "' seems to be offline");

@@ -1,8 +1,7 @@
-package be.kul.rideservice.controller.amqp;
+package be.kul.billingservice.controller.amqp;
 
-import be.kul.rideservice.service.RideService;
-import be.kul.rideservice.utils.amqp.RabbitMQConfig;
-import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.payment.BillInitialisation;
+import be.kul.billingservice.utils.amqp.RabbitMQConfig;
+import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.payment.BillInitialisation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -28,13 +27,13 @@ public class AmqpProducerController {
 
     public void sendPaymentInitialisation(BillInitialisation billInitialisation) throws JsonProcessingException {
         //Convert paymentInitialisation to json
-        String billInitialisationString = objectMapper.writeValueAsString(billInitialisation);
+        String paymentInitialisationString = objectMapper.writeValueAsString(billInitialisation);
 
         //Send the paymentInitialisationString to the payment service
         internalRabbitTemplate.convertAndSend(
                 RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
-                RabbitMQConfig.BILL_INITIALISATION_BINDING_KEY,
-                billInitialisationString
+                RabbitMQConfig.PAYMENT_INITIALISATION_BINDING_KEY,
+                paymentInitialisationString
         );
     }
 

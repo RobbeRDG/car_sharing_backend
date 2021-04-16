@@ -1,4 +1,4 @@
-package be.kul.carservice.utils.amqp;
+package be.kul.billingservice.utils.amqp;
 
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -13,15 +13,6 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class RabbitMQConnectionConfig {
-    @Value("${spring.rabbitmq.external.host}")
-    private String RABBITMQ_EXTERNAL_CONNECTION_HOST;
-
-    @Value("${spring.rabbitmq.external.username}")
-    private String RABBITMQ_EXTERNAL_CONNECTION_USERNAME;
-
-    @Value("${spring.rabbitmq.external.password}")
-    private String RABBITMQ_EXTERNAL_CONNECTION_PASSWORD;
-
     @Value("${spring.rabbitmq.internal.host}")
     private String RABBITMQ_INTERNAL_CONNECTION_HOST;
 
@@ -31,39 +22,6 @@ public class RabbitMQConnectionConfig {
     @Value("${spring.rabbitmq.internal.password}")
     private String RABBITMQ_INTERNAL_CONNECTION_PASSWORD;
 
-    @Value("${spring.configurations.carRequest.expirationTimeInMilliseconds}")
-    private int expirationTimeInMilliseconds;
-
-    @Bean(name = "externalConnectionFactory")
-    public CachingConnectionFactory externalConnectionFactory() {
-        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(RABBITMQ_EXTERNAL_CONNECTION_HOST);
-        cachingConnectionFactory.setUsername(RABBITMQ_EXTERNAL_CONNECTION_USERNAME);
-        cachingConnectionFactory.setVirtualHost(RABBITMQ_EXTERNAL_CONNECTION_USERNAME);
-        cachingConnectionFactory.setPassword(RABBITMQ_EXTERNAL_CONNECTION_PASSWORD);
-        cachingConnectionFactory.setRequestedHeartBeat(30);
-        cachingConnectionFactory.setConnectionTimeout(30000);
-        return cachingConnectionFactory;
-    }
-
-    @Bean(name = "externalRabbitListenerContainerFactory")
-    public SimpleRabbitListenerContainerFactory externalRabbitListenerContainerFactory() {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(externalConnectionFactory());
-        return factory;
-    }
-
-    @Bean(name = "externalRabbitTemplate")
-    public RabbitTemplate externalRabbitTemplate() {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(externalConnectionFactory());
-        rabbitTemplate.setReplyTimeout(expirationTimeInMilliseconds);
-        rabbitTemplate.setUseDirectReplyToContainer(false);
-        return new RabbitTemplate(externalConnectionFactory());
-    }
-
-    @Bean(name = "externalRabbitAdmin")
-    public RabbitAdmin externalRabbitAdmin() {
-        return new RabbitAdmin(externalConnectionFactory());
-    }
 
     @Bean(name = "internalConnectionFactory")
     @Primary
