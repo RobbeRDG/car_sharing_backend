@@ -1,5 +1,6 @@
 package be.kul.billingservice.controller.amqp;
 
+import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.amqp.RabbitMQConfig;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
@@ -18,10 +19,23 @@ public class AmqpConsumerController {
 
     @RabbitListener(queues = RabbitMQConfig.BILL_INITIALISATION_QUEUE, containerFactory = "internalRabbitListenerContainerFactory")
     public void addRide(@Payload String billInitialisationString) throws JsonProcessingException {
-        //get the rideCreation object from the string
+        //get the billInitialisation object from the string
         BillInitialisation billInitialisation = objectMapper.readValue(billInitialisationString, BillInitialisation.class);
 
-        //Handle the ride initialisation
+        //Handle the bill initialisation
         billingService.addBill(billInitialisation);
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.BILL_PROCESSING_QUEUE, containerFactory = "internalRabbitListenerContainerFactory")
+    public void processBill(@Payload String billString) {
+        try {
+            //get the Bill object from the string
+            Bill bill = objectMapper.readValue(billString, Bill.class);
+
+            //Handle processing of the bill
+            billingService.processBill(bill);
+        } catch (JsonProcessingException e) {
+            billingService.logger.error("Couldn't process new bill: " + e.getLocalizedMessage());
+        }
     }
 }

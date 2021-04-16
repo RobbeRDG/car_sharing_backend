@@ -8,6 +8,8 @@ import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillIni
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodUpdate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.netflix.discovery.converters.Auto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BillingService {
+    public static final Logger logger = LoggerFactory.getLogger(BillingService.class);
+
     @Autowired
     private BillRepository billRepository;
 
@@ -43,6 +47,11 @@ public class BillingService {
         billRepository.save(bill);
 
         //Send the bill to the bill
+        amqpProducerController.sendBillToPaymentProcessor(bill);
+    }
 
+    public void processBill(Bill bill) {
+        //Todo
+        logger.info("processed bill");
     }
 }

@@ -18,6 +18,8 @@ public class RabbitMQConfig {
     public static final String BILL_INITIALISATION_BINDING_KEY = "paymentService.bill.new.*";
     public static final String USER_PAYMENT_METHOD_UPDATE_QUEUE = "userPaymentMethodUpdate";
     public static final String USER_PAYMENT_METHOD_UPDATE_BINDING_KEY = "carService.userPaymentMethod.update.*";
+    public static final String BILL_PROCESSING_QUEUE = "billProcessingQueue";
+    public static final String BILL_PROCESSING_BINDING_KEY = "carService.billProcessing.new.*";
 
 
     @Resource(name="internalRabbitAdmin")
@@ -50,6 +52,14 @@ public class RabbitMQConfig {
                 BindingBuilder.bind(userPaymentMethodUpdateQueue())
                         .to(serverToServer)
                         .with(USER_PAYMENT_METHOD_UPDATE_BINDING_KEY));
+
+        //Payment processing queue
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(paymentProcessingQueue());
+        internalRabbitAdmin.declareBinding(
+                BindingBuilder.bind(paymentProcessingQueue())
+                        .to(serverToServer)
+                        .with(BILL_PROCESSING_BINDING_KEY));
     }
 
     @Bean
@@ -78,6 +88,15 @@ public class RabbitMQConfig {
     public Queue userPaymentMethodUpdateQueue() {
         return QueueBuilder
                 .durable(USER_PAYMENT_METHOD_UPDATE_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(BILLING_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue paymentProcessingQueue() {
+        return QueueBuilder
+                .durable(BILL_PROCESSING_QUEUE)
                 .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
                 .deadLetterRoutingKey(BILLING_SERVICE_DLQ_BINDING_KEY)
                 .build();

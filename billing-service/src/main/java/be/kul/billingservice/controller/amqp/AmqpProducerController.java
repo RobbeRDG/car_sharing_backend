@@ -1,5 +1,6 @@
 package be.kul.billingservice.controller.amqp;
 
+import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.amqp.RabbitMQConfig;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodUpdate;
@@ -38,4 +39,19 @@ public class AmqpProducerController {
         );
     }
 
+    public void sendBillToPaymentProcessor(Bill bill) {
+        try {
+            //Convert bill to json
+            String billString = objectMapper.writeValueAsString(bill);
+
+            //Send the billString to payment processing
+            internalRabbitTemplate.convertAndSend(
+                    RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
+                    RabbitMQConfig.BILL_PROCESSING_BINDING_KEY,
+                    billString
+            );
+        } catch (JsonProcessingException e) {
+            BillingService.logger.error("Couldn't send bill to payment processor: " + e.getLocalizedMessage());
+        }
+    }
 }
