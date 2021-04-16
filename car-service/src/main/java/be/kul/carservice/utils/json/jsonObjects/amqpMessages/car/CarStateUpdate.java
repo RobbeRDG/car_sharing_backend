@@ -13,6 +13,7 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +22,7 @@ import java.sql.Timestamp;
 public class CarStateUpdate implements Serializable {
     @JsonIgnore
     private long carId;
-    private Timestamp createdOn;
+    private LocalDateTime createdOn;
     private boolean online;
     private int remainingFuelInKilometers;
     @JsonSerialize( using = GeometrySerializer.class)
@@ -44,11 +45,11 @@ public class CarStateUpdate implements Serializable {
         return carId;
     }
 
-    public Timestamp getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Timestamp createdOn) {
+    public void setCreatedOn(LocalDateTime createdOn) {
         this.createdOn = createdOn;
     }
 

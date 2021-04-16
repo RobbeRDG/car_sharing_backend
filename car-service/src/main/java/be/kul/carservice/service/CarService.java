@@ -25,13 +25,15 @@ import org.springframework.http.ResponseEntity;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @org.springframework.stereotype.Service
 public class CarService {
     public static final Logger logger = LoggerFactory.getLogger(CarService.class);
 
-    private static final int RESERVATION_COOLDOWN_IN_MINUTES = 120;
+    private static final int RESERVATION_COOLDOWN_IN_SECONDS = 7200;
 
     @Autowired
     private AmqpProducerController amqpProducerController;
@@ -58,7 +60,7 @@ public class CarService {
         }
 
         //Set the latestStateUpdate to now
-        car.setLastStateUpdate(new Timestamp(System.currentTimeMillis()));
+        car.setLastStateUpdate(LocalDateTime.now());
         logger.info("Car with numberplate '" +car.getNumberPlate() + "' created");
         return carRepository.save(car);
     }
@@ -84,7 +86,7 @@ public class CarService {
         }
 
         //Set the latestStateUpdate of each car to now
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
         for(Car car: carList) {
             car.setLastStateUpdate(now);
         }
@@ -144,7 +146,7 @@ public class CarService {
         if (!car.canBeReserved()) throw new NotAvailableException("Couldn't reserve car: The car with id '" + carId + "' can't be reserved now");
 
         //Check if the user can place a reservation
-        if(isUserOnCooldown(userId, RESERVATION_COOLDOWN_IN_MINUTES)) throw new ReservationCooldownException("Couldn't reserve car: User is still on cooldown");
+        if(isUserOnCooldown(userId)) throw new ReservationCooldownException("Couldn't reserve car: User is still on cooldown");
 
         //Create a new reservation
         Reservation reservation = new Reservation(userId, car);
@@ -172,19 +174,22 @@ public class CarService {
         if (mostRecent==null) return false;
 
         //Check if the most recent reservation has already expired
-        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-        Timestamp validUntil = mostRecent.getValidUntil();
-        if(validUntil.before(currentTime)) return false;
+        LocalDateTime validUntil = mostRecent.getValidUntil();
+        if(validUntil.isBefore(LocalDateTime.now())) return false;
         else return true;
     }
 
-    public boolean isUserOnCooldown(String userId, int reservationCooldownInMinutes) {
+    public boolean isUserOnCooldown(String userId) {
         Reservation mostRecent =  reservationRepository.getMostRecentReservationFromUser(userId).orElse(null);
         if (mostRecent==null) return false;
 
-        Timestamp currentTimeMinusCooldown = new Timestamp(System.currentTimeMillis() - reservationCooldownInMinutes*60*1000);
-        if (mostRecent.getCreatedOn().before(currentTimeMinusCooldown)) return false;
-        return true;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime latestReservation = mostRecent.getCreatedOn();
+
+        //Calculate the duration between the two
+        Duration duration = Duration.between(now, latestReservation);
+
+        return (duration.toSeconds() < RESERVATION_COOLDOWN_IN_SECONDS);
     }
 
     public Car setCarToActive(long carId) {

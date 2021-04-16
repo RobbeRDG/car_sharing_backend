@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -35,7 +36,7 @@ public class RideService {
     AmqpProducerController amqpProducerController;
 
 
-    public List<Ride> adminGetAllRidesWithinTimeFrame(Date startTime, Date stopTime) {
+    public List<Ride> adminGetAllRidesWithinTimeFrame(LocalDate startTime, LocalDate stopTime) {
         return rideRepository.adminGetAllRidesWithinTimeFrame(startTime, stopTime);
     }
 
@@ -80,14 +81,8 @@ public class RideService {
         Ride ride = rideRepository.findById(rideId).orElse(null);
         if (ride==null) throw new DoesntExistException("Couldn't add waypoint: The ride with id '" + rideId + "' doesn't exist");
 
-        //Create a new waypoint
-        WayPoint wayPoint = waypointRepository.save(new WayPoint(rideWaypoint, ride));
-
-        //Add the waypoint to the ride
-        ride.addWaypoint(wayPoint);
-
-        //Save the new ride state
-        rideRepository.save(ride);
+        //Save the new waypoint
+        waypointRepository.save(new WayPoint(rideWaypoint, ride));
     }
 
     public void endRide(RideEnd rideEnd) throws JsonProcessingException {

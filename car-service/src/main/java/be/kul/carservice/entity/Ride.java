@@ -13,6 +13,7 @@ import org.hibernate.annotations.Parameter;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -43,14 +44,14 @@ public class Ride {
 
     @NotNull
     @JsonView(Views.CarView.Ride.class)
-    private Timestamp createdOn;
+    private LocalDateTime createdOn;
     @JsonView(Views.CarView.Ride.class)
-    private Timestamp startedOn;
+    private LocalDateTime startedOn;
     @JsonView(Views.CarView.Ride.class)
-    private Timestamp finishedOn;
+    private LocalDateTime finishedOn;
     @NotNull
     @JsonView(Views.CarView.Ride.class)
-    private Timestamp lastStateUpdate;
+    private LocalDateTime lastStateUpdate;
     @NotNull
     @Enumerated(EnumType.STRING)
     @JsonView(Views.CarView.Ride.class)
@@ -60,7 +61,7 @@ public class Ride {
     public Ride(@NotNull String userId, @NotNull Car car) {
         this.userId = userId;
         this.car = car;
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
         this.createdOn = now;
         this.lastStateUpdate= now;
         this.currentState = RideStateEnum.WAITING_FOR_CAR_ACKNOWLEDGEMENT;
@@ -78,7 +79,7 @@ public class Ride {
         return car;
     }
 
-    public Timestamp getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
@@ -86,34 +87,34 @@ public class Ride {
         return currentState;
     }
 
-    public Timestamp getStartedOn() {
+    public LocalDateTime getStartedOn() {
         return startedOn;
     }
 
-    public Timestamp getFinishedOn() {
+    public LocalDateTime getFinishedOn() {
         return finishedOn;
     }
 
-    public Timestamp getLastStateUpdate() {
+    public LocalDateTime getLastStateUpdate() {
         return lastStateUpdate;
     }
 
     public void start() {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
         this.startedOn = now;
         this.currentState = RideStateEnum.IN_PROGRESS;
         this.lastStateUpdate= now;
     }
 
     public void end() {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
         this.finishedOn = now;
         this.currentState = RideStateEnum.FINISHED;
         this.lastStateUpdate= now;
     }
 
     public void cancel() {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
         this.currentState = RideStateEnum.CANCELED;
         this.lastStateUpdate= now;
     }

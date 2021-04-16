@@ -3,6 +3,8 @@ package be.kul.rideservice.entity;
 import be.kul.rideservice.utils.helperObjects.RideStateEnum;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
+import be.kul.rideservice.utils.json.jsonViews.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,27 +25,34 @@ import java.util.Set;
 @Entity
 public class Ride {
     @Id
+    @JsonView(Views.RideView.Basic.class)
     private long rideId;
     @NotNull
+    @JsonView(Views.RideView.Basic.class)
     private long carId;
     @NotNull
+    @JsonView(Views.RideView.Basic.class)
     private String userId;
 
     @NotNull
-    private Timestamp createdOn;
-    private Timestamp startedOn;
-    private Timestamp finishedOn;
+    @JsonView(Views.RideView.Admin.class)
+    private LocalDateTime createdOn;
+    @JsonView(Views.RideView.Basic.class)
+    private LocalDateTime startedOn;
+    @JsonView(Views.RideView.Basic.class)
+    private LocalDateTime finishedOn;
     @NotNull
-    private Timestamp lastStateUpdate;
+    @JsonView(Views.RideView.Admin.class)
+    private LocalDateTime lastStateUpdate;
     @NotNull
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.RideView.Basic.class)
     private RideStateEnum currentState;
 
-    @OneToMany
-    @JoinColumn(name = "ride_id")
+    @OneToMany(mappedBy = "ride")
+    @JsonView(Views.RideView.Full.class)
     private Set<WayPoint> wayPoints;
-    @Transient
-    private double distanceTraveledInKm;
+
 
     public Ride(RideInitialisation rideInitialisation) {
         this.rideId = rideInitialisation.getRideId();
@@ -70,19 +80,19 @@ public class Ride {
         return userId;
     }
 
-    public Timestamp getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
-    public Timestamp getStartedOn() {
+    public LocalDateTime getStartedOn() {
         return startedOn;
     }
 
-    public Timestamp getFinishedOn() {
+    public LocalDateTime getFinishedOn() {
         return finishedOn;
     }
 
-    public Timestamp getLastStateUpdate() {
+    public LocalDateTime getLastStateUpdate() {
         return lastStateUpdate;
     }
 
@@ -94,12 +104,9 @@ public class Ride {
         return wayPoints;
     }
 
-    public double getDistanceTraveledInKm() {
-        return distanceTraveledInKm;
-    }
 
     public void addWaypoint(WayPoint wayPoint) {
-        if ((currentState== RideStateEnum.FINISHED || currentState== RideStateEnum.PAID) && wayPoint.getTime().after(finishedOn)){
+        if ((currentState== RideStateEnum.FINISHED || currentState== RideStateEnum.PAID) && wayPoint.getTime().isAfter(finishedOn)){
             throw new IllegalArgumentException("Couldn't add waypoint: Waypoint created after ride had ended");
         }
         wayPoints.add(wayPoint);

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,8 +16,8 @@ import java.sql.Timestamp;
 public class RideEnd {
     private long rideId;
     private RideStateEnum currentState;
-    private Timestamp finishedOn;
-    private Timestamp lastStateUpdate;
+    private LocalDateTime finishedOn;
+    private LocalDateTime lastStateUpdate;
 
     public long getRideId() {
         return rideId;
@@ -26,11 +27,11 @@ public class RideEnd {
         return currentState;
     }
 
-    public Timestamp getFinishedOn() {
+    public LocalDateTime getFinishedOn() {
         return finishedOn;
     }
 
-    public Timestamp getLastStateUpdate() {
+    public LocalDateTime getLastStateUpdate() {
         return lastStateUpdate;
     }
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,8 +17,8 @@ public class BillInitialisation {
     private long rideId;
     private long carId;
     private String userId;
-    private Timestamp startedOn;
-    private Timestamp finishedOn;
+    private LocalDateTime startedOn;
+    private LocalDateTime finishedOn;
 
     public BillInitialisation(Ride ride) {
         this.rideId = ride.getRideId();

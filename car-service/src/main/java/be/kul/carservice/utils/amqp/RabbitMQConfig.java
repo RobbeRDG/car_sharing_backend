@@ -14,6 +14,9 @@ public class RabbitMQConfig {
     public static final String CARS_TO_SERVER_EXCHANGE = "carsToServer";
     public static final String SERVER_TO_CARS_EXCHANGE = "serverToCars";
     public static final String SERVER_TO_SERVER_EXCHANGE = "serverToServer";
+    public static final String CAR_SERVICE_DLQ = "carServiceDLQ";
+    public static final String CAR_SERVICE_DLQ_BINDING_KEY = "carService.dlq";
+    public static final String RIDE_SERVICE_DLQ_BINDING_KEY = "rideService.dlq";
     public static final String CAR_STATE_QUEUE = "carState";
     public static final String CAR_STATE_BINDING_KEY = "carService.cars.state.*";
     public static final String RIDE_INITIALISATION_QUEUE = "rideInitialisation";
@@ -34,44 +37,55 @@ public class RabbitMQConfig {
 
     @PostConstruct
     public void RabbitInit() {
+        TopicExchange serverToServer = new TopicExchange(SERVER_TO_SERVER_EXCHANGE);
+        TopicExchange serverToCars = new TopicExchange(SERVER_TO_CARS_EXCHANGE);
+        TopicExchange carsToServer = new TopicExchange(CARS_TO_SERVER_EXCHANGE);
+        //DLQ
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(carServiceDLQ());
+        internalRabbitAdmin.declareBinding(
+                BindingBuilder.bind(carServiceDLQ())
+                        .to(serverToServer)
+                        .with(CAR_SERVICE_DLQ_BINDING_KEY));
+
         //Car state update
-        externalRabbitAdmin.declareExchange(new TopicExchange(CARS_TO_SERVER_EXCHANGE));
-        externalRabbitAdmin.declareQueue(new Queue(CAR_STATE_QUEUE));
+        externalRabbitAdmin.declareExchange(carsToServer);
+        externalRabbitAdmin.declareQueue(carStateQueue());
         externalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(CAR_STATE_QUEUE))
-                        .to(new TopicExchange(CARS_TO_SERVER_EXCHANGE))
+                BindingBuilder.bind(carStateQueue())
+                        .to(carsToServer)
                         .with(CAR_STATE_BINDING_KEY));
 
         //Ride initialisation
-        internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(RIDE_INITIALISATION_QUEUE));
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(rideInitialisationQueue());
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(RIDE_INITIALISATION_QUEUE))
-                        .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
+                BindingBuilder.bind(rideInitialisationQueue())
+                        .to(serverToServer)
                         .with(RIDE_INITIALISATION_BINDING_KEY));
 
         //Ride waypoint
-        internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(RIDE_WAYPOINT_QUEUE));
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(rideWaypointQueue());
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(RIDE_WAYPOINT_QUEUE))
-                        .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
+                BindingBuilder.bind(rideWaypointQueue())
+                        .to(serverToServer)
                         .with(RIDE_WAYPOINT_BINDING_KEY));
 
         //Ride end
-        internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(RIDE_END_QUEUE));
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(rideEndQueue());
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(RIDE_END_QUEUE))
-                        .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
+                BindingBuilder.bind(rideEndQueue())
+                        .to(serverToServer)
                         .with(RIDE_END_BINDING_KEY));
 
         //Payment method update
-        internalRabbitAdmin.declareExchange(new TopicExchange(SERVER_TO_SERVER_EXCHANGE));
-        internalRabbitAdmin.declareQueue(new Queue(PAYMENT_METHOD_STATUS_QUEUE));
+        internalRabbitAdmin.declareExchange(serverToServer);
+        internalRabbitAdmin.declareQueue(paymentMethodStatusQueue());
         internalRabbitAdmin.declareBinding(
-                BindingBuilder.bind(new Queue(PAYMENT_METHOD_STATUS_QUEUE))
-                        .to(new TopicExchange(SERVER_TO_SERVER_EXCHANGE))
+                BindingBuilder.bind(paymentMethodStatusQueue())
+                        .to(serverToServer)
                         .with(PAYMENT_METHOD_STATUS_BINDING_KEY));
     }
 
@@ -80,4 +94,56 @@ public class RabbitMQConfig {
         return new AmqpConsumerController();
     }
 
+    @Bean
+    Queue carServiceDLQ() {
+        return QueueBuilder
+                .durable(CAR_SERVICE_DLQ)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .build();
+    }
+
+    @Bean
+    public Queue carStateQueue() {
+        return QueueBuilder
+                .durable(CAR_STATE_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(CAR_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue rideInitialisationQueue() {
+        return QueueBuilder
+                .durable(RIDE_INITIALISATION_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(RIDE_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue rideWaypointQueue() {
+        return QueueBuilder
+                .durable(RIDE_WAYPOINT_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(RIDE_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue rideEndQueue() {
+        return QueueBuilder
+                .durable(RIDE_END_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(RIDE_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue paymentMethodStatusQueue() {
+        return QueueBuilder
+                .durable(PAYMENT_METHOD_STATUS_QUEUE)
+                .deadLetterExchange(SERVER_TO_SERVER_EXCHANGE)
+                .deadLetterRoutingKey(CAR_SERVICE_DLQ_BINDING_KEY)
+                .build();
+    }
 }

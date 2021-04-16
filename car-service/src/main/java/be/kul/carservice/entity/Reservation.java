@@ -12,6 +12,8 @@ import org.hibernate.annotations.Parameter;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @NoArgsConstructor
@@ -39,10 +41,10 @@ public class Reservation {
     private String userId;
     @NotNull
     @JsonView(Views.CarView.Reserved.class)
-    private Timestamp createdOn;
+    private LocalDateTime createdOn;
     @NotNull
     @JsonView(Views.CarView.Reserved.class)
-    private Timestamp validUntil;
+    private LocalDateTime validUntil;
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "car_id")
@@ -53,16 +55,16 @@ public class Reservation {
         this.userId = userId;
         this.car = car;
 
-        long currentTime = System.currentTimeMillis();
-        this.createdOn = new Timestamp(currentTime);
-        this.validUntil = new Timestamp(currentTime + reservationIntervalInSeconds*1000); // *1000 because milliseconds
+        LocalDateTime now = LocalDateTime.now();
+        this.createdOn = now;
+        this.validUntil = now.plus(reservationIntervalInSeconds, ChronoUnit.SECONDS);
     }
 
-    public Timestamp getValidUntil() {
+    public LocalDateTime getValidUntil() {
         return validUntil;
     }
 
-    public Timestamp getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 

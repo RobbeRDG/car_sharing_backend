@@ -1,7 +1,9 @@
 package be.kul.rideservice.entity;
 
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
+import be.kul.rideservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,7 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,16 +37,20 @@ public class WayPoint {
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
     )
+    @JsonView(Views.RideView.Full.class)
     private long wayPointId;
     @NotNull
-    private Timestamp time;
+    @JsonView(Views.RideView.Full.class)
+    private LocalDateTime time;
     @NotNull
     @JsonSerialize( using = GeometrySerializer.class)
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
+    @JsonView(Views.RideView.Full.class)
     private Point location;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name="ride_id")
     private Ride ride;
 
     public WayPoint(RideWaypoint rideWaypoint, Ride ride) {
@@ -52,7 +59,7 @@ public class WayPoint {
         this.ride = ride;
     }
 
-    public Timestamp getTime() {
+    public LocalDateTime getTime() {
         return time;
     }
 }

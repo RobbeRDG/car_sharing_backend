@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,10 +20,10 @@ public class RideInitialisation extends AmqpMessage {
     private long carId;
     private String userId;
     private RideStateEnum currentState;
-    private Timestamp createdOn;
-    private Timestamp startedOn;
-    private Timestamp finishedOn;
-    private Timestamp lastStateUpdate;
+    private LocalDateTime createdOn;
+    private LocalDateTime startedOn;
+    private LocalDateTime finishedOn;
+    private LocalDateTime lastStateUpdate;
 
     public RideInitialisation(Ride ride) {
         super();

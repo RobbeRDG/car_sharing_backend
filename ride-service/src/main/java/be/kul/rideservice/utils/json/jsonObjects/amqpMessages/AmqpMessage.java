@@ -6,18 +6,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
 @Setter
 public class AmqpMessage {
-    private Timestamp messageCreationTimestamp;
+    private LocalDateTime messageCreationTimestamp;
 
     public AmqpMessage() {
-        this.messageCreationTimestamp = new Timestamp(System.currentTimeMillis());
+        this.messageCreationTimestamp = LocalDateTime.now();
     }
 
-    public Timestamp getMessageCreationTimestamp() {
+    public LocalDateTime getMessageCreationTimestamp() {
         return messageCreationTimestamp;
     }
 }

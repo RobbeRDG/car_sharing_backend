@@ -6,6 +6,8 @@ public class Views {
         }
         public static interface Full extends Basic {
         }
+        public static interface Admin extends Full {
+        }
     }
 
 }

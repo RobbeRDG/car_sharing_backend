@@ -13,6 +13,7 @@ import org.n52.jackson.datatype.jts.GeometryDeserializer;
 import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +24,7 @@ public class RideWaypoint extends AmqpMessage {
     @JsonSerialize( using = GeometrySerializer.class)
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     private Point location;
-    private Timestamp time;
+    private LocalDateTime time;
 
     public RideWaypoint(CarStateUpdate carStateUpdate, long rideId) {
         super();

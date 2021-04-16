@@ -5,12 +5,14 @@ import be.kul.rideservice.service.RideService;
 import be.kul.rideservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 
 @org.springframework.web.bind.annotation.RestController
@@ -22,7 +24,11 @@ public class RestController {
     @GetMapping("/admin/rides")
     public @ResponseBody
     @JsonView(Views.RideView.Basic.class )
-    List<Ride> adminGetAllRidesWithinTimeFrame(@RequestParam Date startTime, @RequestParam Date stopTime) {
+    List<Ride> adminGetAllRidesWithinTimeFrame(
+            @RequestParam("startTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate startTime,
+            @RequestParam("stopTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate stopTime)
+    {
+        RideService.logger.info("test");
         return rideService.adminGetAllRidesWithinTimeFrame(startTime, stopTime);
     }
 

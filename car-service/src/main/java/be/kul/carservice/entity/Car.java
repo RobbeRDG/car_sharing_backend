@@ -17,6 +17,7 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -65,7 +66,7 @@ public class Car {
     //Car state
     @NotNull
     @JsonView(Views.CarView.Full.class)
-    private Timestamp lastStateUpdate;
+    private LocalDateTime lastStateUpdate;
     @NotNull
     @JsonView(Views.CarView.Full.class)
     private boolean online; //If the car is online
@@ -139,7 +140,7 @@ public class Car {
         this.online = online;
     }
 
-    public void setLastStateUpdate(Timestamp timestamp) {
+    public void setLastStateUpdate(LocalDateTime timestamp) {
         this.lastStateUpdate = timestamp;
     }
 

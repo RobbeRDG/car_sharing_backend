@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -15,7 +16,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
             "FROM rides.ride as r " +
             "WHERE r.started_on between :startDate and :stopDate "
             , nativeQuery = true)
-    List<Ride> adminGetAllRidesWithinTimeFrame(@Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
+    List<Ride> adminGetAllRidesWithinTimeFrame(@Param("startDate") LocalDate startDate, @Param("stopDate") LocalDate stopDate);
 
     @Query(value = "SELECT * " +
             "FROM rides.ride as r " +
