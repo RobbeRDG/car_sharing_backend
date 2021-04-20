@@ -1,6 +1,6 @@
 package be.kul.carservice.entity;
 
-import be.kul.carservice.utils.helperObjects.RideStateEnum;
+import be.kul.carservice.utils.helperObjects.RideStatusEnum;
 import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -12,7 +12,6 @@ import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -51,11 +50,11 @@ public class Ride {
     private LocalDateTime finishedOn;
     @NotNull
     @JsonView(Views.CarView.Ride.class)
-    private LocalDateTime lastStateUpdate;
+    private LocalDateTime lastStatusUpdate;
     @NotNull
     @Enumerated(EnumType.STRING)
     @JsonView(Views.CarView.Ride.class)
-    private RideStateEnum currentState;
+    private RideStatusEnum currentStatus;
 
 
     public Ride(@NotNull String userId, @NotNull Car car) {
@@ -63,8 +62,8 @@ public class Ride {
         this.car = car;
         LocalDateTime now = LocalDateTime.now();
         this.createdOn = now;
-        this.lastStateUpdate= now;
-        this.currentState = RideStateEnum.WAITING_FOR_CAR_ACKNOWLEDGEMENT;
+        this.lastStatusUpdate = now;
+        this.currentStatus = RideStatusEnum.WAITING_FOR_CAR_ACKNOWLEDGEMENT;
     }
 
     public long getRideId() {
@@ -83,8 +82,8 @@ public class Ride {
         return createdOn;
     }
 
-    public RideStateEnum getCurrentState() {
-        return currentState;
+    public RideStatusEnum getCurrentStatus() {
+        return currentStatus;
     }
 
     public LocalDateTime getStartedOn() {
@@ -95,27 +94,27 @@ public class Ride {
         return finishedOn;
     }
 
-    public LocalDateTime getLastStateUpdate() {
-        return lastStateUpdate;
+    public LocalDateTime getLastStatusUpdate() {
+        return lastStatusUpdate;
     }
 
     public void start() {
         LocalDateTime now = LocalDateTime.now();
         this.startedOn = now;
-        this.currentState = RideStateEnum.IN_PROGRESS;
-        this.lastStateUpdate= now;
+        this.currentStatus = RideStatusEnum.IN_PROGRESS;
+        this.lastStatusUpdate = now;
     }
 
     public void end() {
         LocalDateTime now = LocalDateTime.now();
         this.finishedOn = now;
-        this.currentState = RideStateEnum.FINISHED;
-        this.lastStateUpdate= now;
+        this.currentStatus = RideStatusEnum.FINISHED;
+        this.lastStatusUpdate = now;
     }
 
     public void cancel() {
         LocalDateTime now = LocalDateTime.now();
-        this.currentState = RideStateEnum.CANCELED;
-        this.lastStateUpdate= now;
+        this.currentStatus = RideStatusEnum.CANCELED;
+        this.lastStatusUpdate = now;
     }
 }

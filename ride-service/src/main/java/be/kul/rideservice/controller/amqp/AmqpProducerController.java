@@ -32,7 +32,7 @@ public class AmqpProducerController {
 
         //Send the paymentInitialisationString to the payment service
         internalRabbitTemplate.convertAndSend(
-                RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
+                RabbitMQConfig.INTERNAL_EXCHANGE,
                 RabbitMQConfig.BILL_INITIALISATION_BINDING_KEY,
                 billInitialisationString
         );

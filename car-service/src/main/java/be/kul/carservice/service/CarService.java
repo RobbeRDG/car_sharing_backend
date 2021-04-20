@@ -4,35 +4,31 @@ import be.kul.carservice.controller.amqp.AmqpProducerController;
 import be.kul.carservice.entity.Car;
 import be.kul.carservice.entity.Reservation;
 import be.kul.carservice.entity.Ride;
-import be.kul.carservice.entity.User;
+import be.kul.carservice.entity.UserPaymentMethodStatus;
 import be.kul.carservice.repository.CarRepository;
 import be.kul.carservice.repository.ReservationRepository;
 import be.kul.carservice.repository.RideRepository;
-import be.kul.carservice.repository.UserRepository;
+import be.kul.carservice.repository.UserPaymentMethodStatusRepository;
 import be.kul.carservice.utils.exceptions.*;
-import be.kul.carservice.utils.helperObjects.PaymentMethodStatusEnum;
-import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.*;
-import be.kul.carservice.utils.json.jsonObjects.amqpMessages.payment.PaymentMethodStatusUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStatusUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.payment.UserPaymentMethodStatusUpdate;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @org.springframework.stereotype.Service
 public class CarService {
-    public static final Logger logger = LoggerFactory.getLogger(CarService.class);
-
     private static final int RESERVATION_COOLDOWN_IN_SECONDS = 7200;
 
     @Autowired
@@ -42,7 +38,7 @@ public class CarService {
     private CarRepository carRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserPaymentMethodStatusRepository userPaymentMethodStatusRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -55,13 +51,13 @@ public class CarService {
         //First check if the car doesn't already exist
         if (carRepository.existsByNumberPlate(car.getNumberPlate())) {
             String errorMessage = "Car with numberplate '" + car.getNumberPlate() + "' already exists";
-            logger.warn(errorMessage);
+            log.warn(errorMessage);
             throw new AlreadyExistsException(errorMessage);
         }
 
         //Set the latestStateUpdate to now
         car.setLastStateUpdate(LocalDateTime.now());
-        logger.info("Car with numberplate '" +car.getNumberPlate() + "' created");
+        log.info("Car with numberplate '" +car.getNumberPlate() + "' created");
         return carRepository.save(car);
     }
 
@@ -81,7 +77,7 @@ public class CarService {
         }
         errorMessage.append("Already exist");
         if (error) {
-            logger.warn(errorMessage.toString());
+            log.warn(errorMessage.toString());
             throw new AlreadyExistsException(errorMessage.toString());
         }
 
@@ -91,7 +87,7 @@ public class CarService {
             car.setLastStateUpdate(now);
         }
 
-        logger.info("Multiple cars created");
+        log.info("Multiple cars created");
         return carRepository.saveAll(carList);
     }
 
@@ -104,7 +100,7 @@ public class CarService {
     }
 
 
-    public Car updateCarState(CarStateUpdate stateUpdate) throws JsonProcessingException {
+    public Car updateCarStatus(CarStatusUpdate stateUpdate) throws JsonProcessingException {
         long carId = stateUpdate.getCarId();
         Car car = carRepository.findById(carId).orElse(null);
         if (car==null) throw new DoesntExistException("Couldn't update car state: The car with id '" + carId + "' doesn't exist");
@@ -122,7 +118,7 @@ public class CarService {
         }
 
 
-        logger.info("Updated car state of car with id '" + carId + "'");
+        log.info("Updated car state of car with id '" + carId + "'");
         return carRepository.save(car);
     }
 
@@ -155,7 +151,7 @@ public class CarService {
         car.setCurrentReservation(reservation);
 
         //Log the reservation
-        logger.info("Placed reservation on car with id '" + carId + "'");
+        log.info("Placed reservation on car with id '" + carId + "'");
 
         //Save the new state
         return carRepository.save(car);
@@ -218,14 +214,11 @@ public class CarService {
 
     @Transactional(dontRollbackOn = {DoesntExistException.class, NotAvailableException.class, RequestDeniedException.class, CarOfflineException.class})
     public Car startRide(String userId, long carId) throws Exception {
-        /*
         //Check if the user has a valid paymentMethod
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null || !user.getPaymentMethodStatus().equals(PaymentMethodStatusEnum.VALID)) throw new NotAllowedException(
+        UserPaymentMethodStatus userPaymentMethodStatus = userPaymentMethodStatusRepository.findById(userId).orElse(null);
+        if (userPaymentMethodStatus == null || !userPaymentMethodStatus.hasUserValidPaymentMethod()) throw new NotAllowedException(
                 "Couldn't start ride: This user doesn't have a valid payment method"
         );
-
-         */
 
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
@@ -375,13 +368,26 @@ public class CarService {
                 HttpStatus.OK);
     }
 
-    public void updatePaymentMethodStatus(PaymentMethodStatusUpdate paymentMethodStatusUpdate) {
-        String userId = paymentMethodStatusUpdate.getUserId();
+    public void updateUserPaymentMethodStatus(UserPaymentMethodStatusUpdate userPaymentMethodStatusUpdate) {
+        String userId = userPaymentMethodStatusUpdate.getUserId();
 
-        //Check if the user has a valid paymentMethod
-        User user = userRepository.findById(userId).orElse(null);
-        if (user==null) throw new DoesntExistException("Couldn't update payment method status:  The user with id '" + userId + " doesn't exist");
+        log.info(String.valueOf(userPaymentMethodStatusUpdate.hasUserValidPaymentMethod()));
 
-        userRepository.save(user);
+
+        //Get the userPaymentMethodStatus if exists, else create new one
+        UserPaymentMethodStatus userPaymentMethodStatus = userPaymentMethodStatusRepository.findById(userId).orElse(null);
+        if (userPaymentMethodStatus==null) {
+            userPaymentMethodStatus = new UserPaymentMethodStatus(userId);
+            userPaymentMethodStatus.updatePaymentMethodStatus(userPaymentMethodStatusUpdate);
+        } else {
+            //Check if the new update is the most recent version if the
+            boolean isMostRecent = userPaymentMethodStatusUpdate.getMessageCreationTimestamp().isAfter(userPaymentMethodStatus.getLastStateUpdate());
+
+            //Update the paymentMethodStatus if it is the most recent version
+            if (isMostRecent) userPaymentMethodStatus.updatePaymentMethodStatus(userPaymentMethodStatusUpdate);
+        }
+
+        //Save the new payment method status
+        userPaymentMethodStatusRepository.save(userPaymentMethodStatus);
     }
 }

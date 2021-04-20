@@ -63,7 +63,7 @@ public class Car {
     @JsonView(Views.CarView.Basic.class)
     private String numberPlate;
 
-    //Car state
+    //Car status
     @NotNull
     @JsonView(Views.CarView.Full.class)
     private LocalDateTime lastStateUpdate;

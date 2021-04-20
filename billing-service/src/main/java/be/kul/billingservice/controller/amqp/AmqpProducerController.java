@@ -3,9 +3,11 @@ package be.kul.billingservice.controller.amqp;
 import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.amqp.RabbitMQConfig;
-import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodUpdate;
+import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;
+import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodStatusUpdate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
+@Slf4j
 @Component
 public class AmqpProducerController {
     @Resource(name = "internalRabbitTemplate")
@@ -27,31 +30,39 @@ public class AmqpProducerController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendUserPaymentMethodUpdate(UserPaymentMethodUpdate userPaymentMethodUpdate) throws JsonProcessingException {
+    public void sendUserPaymentMethodUpdate(UserPaymentMethodStatusUpdate userPaymentMethodStatusUpdate) throws JsonProcessingException {
         //Convert userPaymentMethodUpdate to json
-        String userPaymentMethodUpdateString = objectMapper.writeValueAsString(userPaymentMethodUpdate);
+        String userPaymentMethodStatusUpdateString = objectMapper.writeValueAsString(userPaymentMethodStatusUpdate);
 
         //Send the paymentInitialisationString to the payment service
         internalRabbitTemplate.convertAndSend(
-                RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
+                RabbitMQConfig.INTERNAL_EXCHANGE,
                 RabbitMQConfig.USER_PAYMENT_METHOD_UPDATE_BINDING_KEY,
-                userPaymentMethodUpdateString
+                userPaymentMethodStatusUpdateString
         );
     }
 
-    public void sendBillToPaymentProcessor(Bill bill) {
-        try {
-            //Convert bill to json
-            String billString = objectMapper.writeValueAsString(bill);
+    public void sendBillToPaymentProcessor(long billId) {
+        //Convert billId to string
+        String billIdString = String.valueOf(billId);
 
-            //Send the billString to payment processing
-            internalRabbitTemplate.convertAndSend(
-                    RabbitMQConfig.SERVER_TO_SERVER_EXCHANGE,
-                    RabbitMQConfig.BILL_PROCESSING_BINDING_KEY,
-                    billString
-            );
-        } catch (JsonProcessingException e) {
-            BillingService.logger.error("Couldn't send bill to payment processor: " + e.getLocalizedMessage());
-        }
+        //Send the billString to payment processing
+        internalRabbitTemplate.convertAndSend(
+                RabbitMQConfig.INTERNAL_EXCHANGE,
+                RabbitMQConfig.BILL_PROCESSING_BINDING_KEY,
+                billIdString
+        );
+    }
+
+    public void sendBillStatusUpdate(BillStatusUpdate billStatusUpdate) throws JsonProcessingException {
+        //Convert billStatusUpdate to json
+        String billStatusUpdateString = objectMapper.writeValueAsString(billStatusUpdate);
+
+        //Send the billString to payment processing
+        internalRabbitTemplate.convertAndSend(
+                RabbitMQConfig.INTERNAL_EXCHANGE,
+                RabbitMQConfig.BILL_STATUS_UPDATE_BINDING_KEY,
+                billStatusUpdateString
+        );
     }
 }

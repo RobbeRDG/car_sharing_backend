@@ -1,6 +1,8 @@
 package be.kul.rideservice.entity;
 
-import be.kul.rideservice.utils.helperObjects.RideStateEnum;
+import be.kul.rideservice.utils.helperObjects.BillStatusEnum;
+import be.kul.rideservice.utils.helperObjects.RideStatusEnum;
+import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
 import be.kul.rideservice.utils.json.jsonViews.Views;
@@ -9,11 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.messaging.handler.annotation.SendTo;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +33,6 @@ public class Ride {
     @NotNull
     @JsonView(Views.RideView.Basic.class)
     private String userId;
-
     @NotNull
     @JsonView(Views.RideView.Admin.class)
     private LocalDateTime createdOn;
@@ -43,11 +42,18 @@ public class Ride {
     private LocalDateTime finishedOn;
     @NotNull
     @JsonView(Views.RideView.Admin.class)
-    private LocalDateTime lastStateUpdate;
+    private LocalDateTime lastRideStatusUpdate;
     @NotNull
     @Enumerated(EnumType.STRING)
     @JsonView(Views.RideView.Basic.class)
-    private RideStateEnum currentState;
+    private RideStatusEnum rideStatus;
+    @NotNull
+    @JsonView(Views.RideView.Admin.class)
+    private LocalDateTime lastBillStatusUpdate;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @JsonView(Views.RideView.Basic.class)
+    private BillStatusEnum billStatus;
 
     @OneToMany(mappedBy = "ride")
     @JsonView(Views.RideView.Full.class)
@@ -60,61 +66,27 @@ public class Ride {
         this.carId = rideInitialisation.getCarId();
         this.createdOn = rideInitialisation.getCreatedOn();
         this.startedOn = rideInitialisation.getStartedOn();
-        this.finishedOn = rideInitialisation.getFinishedOn();
-        this.lastStateUpdate = rideInitialisation.getLastStateUpdate();
-        this.currentState = rideInitialisation.getCurrentState();
+        this.lastRideStatusUpdate = rideInitialisation.getLastStateUpdate();
+        this.rideStatus = rideInitialisation.getCurrentState();
+        this.billStatus = BillStatusEnum.UNDEFINED;
+        this.lastBillStatusUpdate = LocalDateTime.now();
         wayPoints = new HashSet<WayPoint>();
 
 
     }
 
-    public long getRideId() {
-        return rideId;
-    }
 
-    public long getCarId() {
-        return carId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public LocalDateTime getCreatedOn() {
-        return createdOn;
-    }
-
-    public LocalDateTime getStartedOn() {
-        return startedOn;
-    }
-
-    public LocalDateTime getFinishedOn() {
-        return finishedOn;
-    }
-
-    public LocalDateTime getLastStateUpdate() {
-        return lastStateUpdate;
-    }
-
-    public RideStateEnum getCurrentState() {
-        return currentState;
-    }
-
-    public Set<WayPoint> getWayPoints() {
-        return wayPoints;
-    }
-
-
-    public void addWaypoint(WayPoint wayPoint) {
-        if ((currentState== RideStateEnum.FINISHED || currentState== RideStateEnum.PAID) && wayPoint.getTime().isAfter(finishedOn)){
-            throw new IllegalArgumentException("Couldn't add waypoint: Waypoint created after ride had ended");
-        }
-        wayPoints.add(wayPoint);
-    }
-
-    public void updateState(RideEnd rideEnd) {
-        this.currentState = rideEnd.getCurrentState();
+    public void endRide(RideEnd rideEnd) {
+        this.rideStatus = rideEnd.getCurrentStatus();
         this.finishedOn = rideEnd.getFinishedOn();
-        this.lastStateUpdate = rideEnd.getLastStateUpdate();
+        this.lastRideStatusUpdate = rideEnd.getCreatedOn();
+    }
+
+    public void updateBillStatus(BillStatusUpdate billStatusUpdate) {
+        //Only set the new status if it is more recent than the current one
+        if (billStatusUpdate.getCreatedOn().isAfter(lastBillStatusUpdate)) {
+            this.billStatus = billStatusUpdate.getBillStatus();
+            this.lastBillStatusUpdate = billStatusUpdate.getCreatedOn();
+        }
     }
 }

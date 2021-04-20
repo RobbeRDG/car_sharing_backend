@@ -2,7 +2,7 @@ package be.kul.carservice.controller;
 
 import be.kul.carservice.entity.Car;
 import be.kul.carservice.service.CarService;
-import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStateUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStatusUpdate;
 import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,14 +44,14 @@ public class RestController {
         return carService.findAllAvailableCarsWithinRadius(longitude, latitude, radiusInKM);
     }
 
-    @PutMapping("/admin/cars/state/{carId}")
+    @PutMapping("/admin/cars/status/{carId}")
     @JsonView(Views.CarView.Full.class)
-    public @ResponseBody Car updateCarState(
-            @RequestBody CarStateUpdate stateUpdate,
+    public @ResponseBody Car updateCarStatus(
+            @RequestBody CarStatusUpdate carStatusUpdate,
             @PathVariable long carId
     ) throws JsonProcessingException {
-        stateUpdate.setCarId(carId);
-        return carService.updateCarState(stateUpdate);
+        carStatusUpdate.setCarId(carId);
+        return carService.updateCarStatus(carStatusUpdate);
     }
 
     @PutMapping("/cars/reservation/{id}")

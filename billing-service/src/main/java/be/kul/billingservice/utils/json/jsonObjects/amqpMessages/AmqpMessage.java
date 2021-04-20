@@ -7,8 +7,6 @@ import lombok.Setter;
 
 import java.sql.Timestamp;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 public class AmqpMessage {
@@ -16,9 +14,5 @@ public class AmqpMessage {
 
     public AmqpMessage() {
         this.messageCreationTimestamp = new Timestamp(System.currentTimeMillis());
-    }
-
-    public Timestamp getMessageCreationTimestamp() {
-        return messageCreationTimestamp;
     }
 }

@@ -24,16 +24,4 @@ public class RideWaypoint extends AmqpMessage {
     @JsonDeserialize( contentUsing = GeometryDeserializer.class)
     private Point location;
     private LocalDateTime time;
-
-    public long getRideId() {
-        return rideId;
-    }
-
-    public Point getLocation() {
-        return location;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
-    }
 }

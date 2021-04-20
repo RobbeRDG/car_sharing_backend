@@ -17,7 +17,6 @@ import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -57,9 +56,5 @@ public class WayPoint {
         this.time = rideWaypoint.getTime();
         this.location = rideWaypoint.getLocation();
         this.ride = ride;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
     }
 }

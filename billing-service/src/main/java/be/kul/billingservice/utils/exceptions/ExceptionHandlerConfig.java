@@ -1,5 +1,6 @@
 package be.kul.billingservice.utils.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -10,9 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+@Slf4j
 @ControllerAdvice
 public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
-    Logger logger = LoggerFactory.getLogger(ExceptionHandlerConfig.class);
 
     @ExceptionHandler(value = {
             NotAllowedException.class,
@@ -20,19 +21,34 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        logger.warn(bodyOfResponse);
-        return handleExceptionInternal(ex, bodyOfResponse,
-                new HttpHeaders(), HttpStatus.CONFLICT, request);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Exception-Type", String.valueOf(ex.getClass()));
+
+        log.warn(bodyOfResponse);
+
+        return handleExceptionInternal(
+                ex,
+                bodyOfResponse,
+                headers,
+                HttpStatus.CONFLICT, request
+        );
     }
 
-    @ExceptionHandler(value = {
-
-    })
+    @ExceptionHandler(value = {}) //Handle all unexpected exceptions
     protected ResponseEntity<Object> handleSomethingWentWrong(RuntimeException ex, WebRequest request) {
-        ex.printStackTrace();
         String bodyOfResponse = ex.getMessage();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Exception-Type", String.valueOf(ex.getClass()));
+
         logger.error(bodyOfResponse);
-        return handleExceptionInternal(ex, bodyOfResponse,
-                new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+        ex.printStackTrace();
+
+        return handleExceptionInternal(
+                ex,
+                bodyOfResponse,
+                headers,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request
+        );
     }
 }

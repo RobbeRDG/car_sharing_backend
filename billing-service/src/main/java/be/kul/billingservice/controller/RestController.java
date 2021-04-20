@@ -1,5 +1,6 @@
 package be.kul.billingservice.controller;
 
+import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -19,12 +20,43 @@ public class RestController {
     @Autowired
     private BillingService billingService;
 
-    @PutMapping("/users/payment-method")
+    @GetMapping("/user-payment-method/setup")
+    public @ResponseBody
+    ResponseEntity<String> initialiseNewUserPaymentMethod(
+            @AuthenticationPrincipal Jwt principal
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return billingService.initialiseNewUserPaymentMethod(userId);
+    }
+
+    @PutMapping("/user-payment-method")
     public @ResponseBody
     ResponseEntity<String> configureNewPaymentMethod(
             @AuthenticationPrincipal Jwt principal
-    ) throws JsonProcessingException {
+    ) {
         String userId = principal.getClaimAsString("sub");
         return billingService.configureNewPaymentMethod(userId);
+    }
+
+    @GetMapping("/bills/{billId}")
+    @JsonView(Views.BillView.Basic.class)
+    public @ResponseBody
+    Bill getBill(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long billId
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return billingService.getBill(userId, billId);
+    }
+
+    @GetMapping("/bills/detail/{billId}")
+    @JsonView(Views.BillView.Detail.class)
+    public @ResponseBody
+    Bill getBillDetail(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long billId
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return billingService.getBill(userId, billId);
     }
 }

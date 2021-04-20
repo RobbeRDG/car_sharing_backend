@@ -1,7 +1,7 @@
 package be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride;
 
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.AmqpMessage;
-import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStateUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStatusUpdate;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,6 @@ import org.locationtech.jts.geom.Point;
 import org.n52.jackson.datatype.jts.GeometryDeserializer;
 import org.n52.jackson.datatype.jts.GeometrySerializer;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -26,10 +25,10 @@ public class RideWaypoint extends AmqpMessage {
     private Point location;
     private LocalDateTime time;
 
-    public RideWaypoint(CarStateUpdate carStateUpdate, long rideId) {
+    public RideWaypoint(CarStatusUpdate carStatusUpdate, long rideId) {
         super();
         this.rideId=rideId;
-        time=carStateUpdate.getCreatedOn();
-        location=carStateUpdate.getLocation();
+        time= carStatusUpdate.getCreatedOn();
+        location= carStatusUpdate.getLocation();
     }
 }

@@ -18,7 +18,4 @@ public class AmqpMessage {
         this.messageCreationTimestamp = LocalDateTime.now();
     }
 
-    public LocalDateTime getMessageCreationTimestamp() {
-        return messageCreationTimestamp;
-    }
 }

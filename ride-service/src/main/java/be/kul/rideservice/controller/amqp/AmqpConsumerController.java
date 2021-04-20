@@ -2,6 +2,7 @@ package be.kul.rideservice.controller.amqp;
 
 import be.kul.rideservice.service.RideService;
 import be.kul.rideservice.utils.amqp.RabbitMQConfig;
+import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
 import be.kul.rideservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
@@ -23,12 +24,12 @@ public class AmqpConsumerController {
     @RabbitListener(queues = RabbitMQConfig.RIDE_INITIALISATION_QUEUE, containerFactory = "internalRabbitListenerContainerFactory")
     public void addRide(@Payload String rideInitialisationString) throws JsonProcessingException {
         //get the rideCreation object from the string
-        RideInitialisation rideCreation = objectMapper.readValue(rideInitialisationString, RideInitialisation.class);
+        RideInitialisation rideInitialisation = objectMapper.readValue(rideInitialisationString, RideInitialisation.class);
 
         RideService.logger.info(rideInitialisationString);
 
         //Handle the ride initialisation
-        rideService.addRide(rideCreation);
+        rideService.addRide(rideInitialisation);
     }
 
     @RabbitListener(queues = RabbitMQConfig.RIDE_WAYPOINT_QUEUE, containerFactory = "internalRabbitListenerContainerFactory")
@@ -47,5 +48,14 @@ public class AmqpConsumerController {
 
         //Handle the new waypoint
         rideService.endRide(rideEnd);
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.BILL_STATUS_UPDATE_QUEUE, containerFactory = "internalRabbitListenerContainerFactory")
+    public void updateBillStatus(@Payload String billStatusUpdateString) throws JsonProcessingException {
+        //get the stateUpdate object from the string
+        BillStatusUpdate billStatusUpdate = objectMapper.readValue(billStatusUpdateString, BillStatusUpdate.class);
+
+        //Handle the new waypoint
+        rideService.updateBillStatus(billStatusUpdate);
     }
 }

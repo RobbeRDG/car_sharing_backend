@@ -1,12 +1,9 @@
 package be.kul.carservice.utils.json.jsonObjects.amqpMessages.car;
 
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.AmqpMessage;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.sql.Timestamp;
 
 @NoArgsConstructor
 @Getter

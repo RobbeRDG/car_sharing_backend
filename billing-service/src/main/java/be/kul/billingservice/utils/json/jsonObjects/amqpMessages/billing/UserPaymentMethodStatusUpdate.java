@@ -11,6 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserPaymentMethodUpdate extends AmqpMessage {
-    private UserPaymentMethodStatusEnum userPaymentMethodStatus;
+public class UserPaymentMethodStatusUpdate extends AmqpMessage {
+    private String userId;
+    private boolean hasUserValidPaymentMethod;
+
+    public boolean hasUserValidPaymentMethod() {
+        return hasUserValidPaymentMethod;
+    }
 }

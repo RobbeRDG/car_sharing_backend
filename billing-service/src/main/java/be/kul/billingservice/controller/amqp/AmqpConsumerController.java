@@ -27,15 +27,11 @@ public class AmqpConsumerController {
     }
 
     @RabbitListener(queues = RabbitMQConfig.BILL_PROCESSING_QUEUE, containerFactory = "internalRabbitListenerContainerFactory")
-    public void processBill(@Payload String billString) {
-        try {
-            //get the Bill object from the string
-            Bill bill = objectMapper.readValue(billString, Bill.class);
+    public void processBill(@Payload String billIdString) {
+        //get the Bill object from the string
+        long billId = Long.parseLong(billIdString);
 
-            //Handle processing of the bill
-            billingService.processBill(bill);
-        } catch (JsonProcessingException e) {
-            billingService.logger.error("Couldn't process new bill: " + e.getLocalizedMessage());
-        }
+        //Handle processing of the bill
+        billingService.processBill(billId);
     }
 }

@@ -12,14 +12,13 @@ import org.n52.jackson.datatype.jts.GeometryDeserializer;
 import org.n52.jackson.datatype.jts.GeometrySerializer;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class CarStateUpdate implements Serializable {
+public class CarStatusUpdate implements Serializable {
     @JsonIgnore
     private long carId;
     private LocalDateTime createdOn;

@@ -29,7 +29,7 @@ spring:
   configurations:
     billing:
       ratePerMinuteInEur: 0.20
-      startUpRateInEur: 5
+      startUpRateInEur: 5.0
 
 
 eureka:
