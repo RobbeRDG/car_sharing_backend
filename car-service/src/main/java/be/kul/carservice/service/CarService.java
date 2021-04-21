@@ -125,14 +125,11 @@ public class CarService {
 
     @Transactional(dontRollbackOn = {NotAvailableException.class, DoesntExistException.class, ReservationCooldownException.class})
     public Car reserveCar(String userId, long carId) {
-        /*
         //Check if the user has a valid paymentMethod
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null || !user.getPaymentMethodStatus().equals(PaymentMethodStatusEnum.VALID)) throw new NotAllowedException(
-                "Couldn't reserve car: This user doesn't have a valid payment method"
+        UserPaymentMethodStatus userPaymentMethodStatus = userPaymentMethodStatusRepository.findById(userId).orElse(null);
+        if (userPaymentMethodStatus == null || !userPaymentMethodStatus.hasUserValidPaymentMethod()) throw new NotAllowedException(
+                "Couldn't start ride: This user doesn't have a valid payment method"
         );
-
-         */
 
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
