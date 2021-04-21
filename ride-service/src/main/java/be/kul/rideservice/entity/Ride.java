@@ -56,7 +56,7 @@ public class Ride {
     private BillStatusEnum billStatus;
 
     @OneToMany(mappedBy = "ride")
-    //@OrderBy(clause = "time desc")
+    @OrderBy("time asc")
     @JsonView(Views.RideView.Full.class)
     private Set<WayPoint> wayPoints;
 
@@ -72,8 +72,6 @@ public class Ride {
         this.billStatus = BillStatusEnum.UNDEFINED;
         this.lastBillStatusUpdate = LocalDateTime.now();
         wayPoints = new HashSet<WayPoint>();
-
-
     }
 
 
