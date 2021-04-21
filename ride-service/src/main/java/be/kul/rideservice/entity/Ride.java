@@ -56,6 +56,7 @@ public class Ride {
     private BillStatusEnum billStatus;
 
     @OneToMany(mappedBy = "ride")
+    //@OrderBy(clause = "time desc")
     @JsonView(Views.RideView.Full.class)
     private Set<WayPoint> wayPoints;
 
