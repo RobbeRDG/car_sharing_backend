@@ -1,5 +1,6 @@
 package be.kul.billingservice.utils.exceptions;
 
+import com.stripe.exception.StripeException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             NotAllowedException.class,
             DoesntExistException.class,
+            StripeException.class
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();

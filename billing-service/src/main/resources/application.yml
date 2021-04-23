@@ -27,6 +27,8 @@ spring:
       username: lzufimom
       password: llcqxq_5XuJES-s0hhmiinhDfV3kVCDj
   configurations:
+    stripe:
+      public_key: sk_test_51DCNdbJnu2HsTIQb0WxNflSAmS2AT4K51Lhy2xZ7aS2BrqVAcDwZB3ug6nMr2my31KVLRSTgo2GjOLqeN30dG4ba00PN2PZKb0
     billing:
       ratePerMinuteInEur: 0.20
       startUpRateInEur: 5.0
