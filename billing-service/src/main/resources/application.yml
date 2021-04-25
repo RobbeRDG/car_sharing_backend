@@ -28,7 +28,7 @@ spring:
       password: llcqxq_5XuJES-s0hhmiinhDfV3kVCDj
   configurations:
     stripe:
-      public_key: sk_test_51DCNdbJnu2HsTIQb0WxNflSAmS2AT4K51Lhy2xZ7aS2BrqVAcDwZB3ug6nMr2my31KVLRSTgo2GjOLqeN30dG4ba00PN2PZKb0
+      public_key: pk_test_51IgUtvGALzc6VVnNN0iSb54nREi8Xci6H1qmQRHf0JAln6DZq0nk6Xw8OudrSvdFpWApCZQIrr1yBZgYashmrWqO00dd9n54JW
     billing:
       ratePerMinuteInEur: 0.20
       startUpRateInEur: 5.0

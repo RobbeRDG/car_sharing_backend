@@ -26,8 +26,8 @@ public class RestController {
     @JsonView(Views.RideView.Basic.class )
     List<Ride> adminGetAllRidesWithinTimeFrame(
             @RequestParam("startTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate startTime,
-            @RequestParam("stopTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate stopTime)
-    {
+            @RequestParam("stopTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate stopTime
+    ) {
         RideService.logger.info("test");
         return rideService.adminGetAllRidesWithinTimeFrame(startTime, stopTime);
     }
@@ -50,7 +50,11 @@ public class RestController {
     @GetMapping("/rides")
     public @ResponseBody
     @JsonView(Views.RideView.Basic.class )
-    List<Ride> getAllRidesWithinTimeFrame(@RequestParam Date startTime, @RequestParam Date stopTime, @AuthenticationPrincipal Jwt principal ) {
+    List<Ride> getAllRidesWithinTimeFrame(
+            @RequestParam("startTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate startTime,
+            @RequestParam("stopTime") @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate stopTime,
+            @AuthenticationPrincipal Jwt principal
+    ){
         String userId = principal.getClaimAsString("sub");
         return rideService.getAllRidesWithinTimeFrame(userId, startTime, stopTime);
     }

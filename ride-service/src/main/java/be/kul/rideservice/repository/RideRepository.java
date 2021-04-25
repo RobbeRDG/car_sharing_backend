@@ -22,7 +22,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
             "FROM rides.ride as r " +
             "WHERE r.started_on between :startDate and :stopDate and r.user_id = :userId "
             , nativeQuery = true)
-    List<Ride> getAllRidesWithinTimeFrame(@Param("userId") String userId, @Param("startDate") Date startDate, @Param("stopDate") Date stopDate);
+    List<Ride> getAllRidesWithinTimeFrame(@Param("userId") String userId, @Param("startDate") LocalDate startDate, @Param("stopDate") LocalDate stopDate);
 
 
 

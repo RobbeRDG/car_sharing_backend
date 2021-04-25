@@ -19,6 +19,7 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             IllegalArgumentException.class,
             DoesntExistException.class,
+            NotAllowedException.class
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();

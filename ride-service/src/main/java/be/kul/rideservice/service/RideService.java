@@ -37,7 +37,7 @@ public class RideService {
     private WaypointRepository waypointRepository;
 
     @Autowired
-    AmqpProducerController amqpProducerController;
+    private AmqpProducerController amqpProducerController;
 
 
     public List<Ride> adminGetAllRidesWithinTimeFrame(LocalDate startTime, LocalDate stopTime) {
@@ -58,14 +58,14 @@ public class RideService {
         if (ride==null) throw new DoesntExistException("Couldn't get the requested ride: The ride with id '" + rideId + "' doesn't exist");
 
         //Check if this ride belongs to the requesting user
-        if (ride.getUserId().equals(userId)) throw new NotAllowedException(
+        if (!ride.getUserId().equals(userId)) throw new NotAllowedException(
                 "Couldn't get the requested ride: this ride does not belong to the requesting user"
         );
 
         return ride;
     }
 
-    public List<Ride> getAllRidesWithinTimeFrame(String userId, Date startTime, Date stopTime) {
+    public List<Ride> getAllRidesWithinTimeFrame(String userId, LocalDate startTime, LocalDate stopTime) {
         return rideRepository.getAllRidesWithinTimeFrame(userId, startTime, stopTime);
     }
 
