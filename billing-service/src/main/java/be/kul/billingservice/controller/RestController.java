@@ -30,13 +30,13 @@ public class RestController {
         return billingService.initialiseNewUserPaymentMethod(userId);
     }
 
-    @PutMapping("/user-payment-method")
+    @GetMapping("/user-payment-method/check")
     public @ResponseBody
-    ResponseEntity<String> configureNewPaymentMethod(
+    ResponseEntity<String> checkUserPaymentMethod(
             @AuthenticationPrincipal Jwt principal
     ) {
         String userId = principal.getClaimAsString("sub");
-        return billingService.configureNewPaymentMethod(userId);
+        return billingService.checkUserPaymentMethod(userId);
     }
 
     @GetMapping("/bills/{billId}")
