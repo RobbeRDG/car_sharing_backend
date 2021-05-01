@@ -2,14 +2,18 @@ package be.kul.rideservice.controller;
 
 import be.kul.rideservice.entity.Ride;
 import be.kul.rideservice.service.RideService;
+import be.kul.rideservice.utils.exceptions.DoesntExistException;
 import be.kul.rideservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -57,6 +61,19 @@ public class RestController {
     ){
         String userId = principal.getClaimAsString("sub");
         return rideService.getAllRidesWithinTimeFrame(userId, startTime, stopTime);
+    }
+
+    @PostMapping("/rides/{rideId}/damage-report")
+    public @ResponseBody
+    ResponseEntity<String> uploadDamageReport(
+            @PathVariable long rideId,
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("reportDescription") String description,
+            @AuthenticationPrincipal Jwt principal
+    ) throws IOException {
+        if (imageFile.isEmpty()) throw new DoesntExistException("Couldn't upload damage report: no image file has been provided");
+        String userId = principal.getClaimAsString("sub");
+        return rideService.uploadDamageReport(userId, rideId, imageFile, description);
     }
 
 

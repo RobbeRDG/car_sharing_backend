@@ -88,4 +88,8 @@ public class Ride {
             this.lastBillStatusUpdate = billStatusUpdate.getCreatedOn();
         }
     }
+
+    public boolean allowsNewDamageReport() {
+        return (!rideStatus.equals(RideStatusEnum.FINISHED));
+    }
 }

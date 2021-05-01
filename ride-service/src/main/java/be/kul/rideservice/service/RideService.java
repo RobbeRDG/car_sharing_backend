@@ -1,8 +1,10 @@
 package be.kul.rideservice.service;
 
 import be.kul.rideservice.controller.amqp.AmqpProducerController;
+import be.kul.rideservice.entity.DamageReport;
 import be.kul.rideservice.entity.Ride;
 import be.kul.rideservice.entity.WayPoint;
+import be.kul.rideservice.repository.DamageReportRepository;
 import be.kul.rideservice.repository.RideRepository;
 import be.kul.rideservice.repository.WaypointRepository;
 import be.kul.rideservice.utils.exceptions.DoesntExistException;
@@ -18,10 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.sql.Date;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,6 +34,9 @@ import java.util.List;
 @Service
 public class RideService {
     public static final Logger logger = LoggerFactory.getLogger(RideService.class);
+
+    @Autowired
+    private DamageReportRepository damageReportRepository;
 
     @Autowired
     private RideRepository rideRepository;
@@ -137,5 +145,31 @@ public class RideService {
             log.error(e.getLocalizedMessage());
             throw e;
         }
+    }
+
+    public ResponseEntity<String> uploadDamageReport(String userId, long rideId, MultipartFile imageFile, String description) throws IOException {
+        //Get the corresponding ride
+        Ride ride = rideRepository.findById(rideId).orElse(null);
+        if (ride==null) throw new DoesntExistException("Couldn't upload damage report: The ride with id '" + rideId + "' doesn't exist");
+
+        //Test if the user owns this ride
+        if (!userId.equals(ride.getUserId())) throw new NotAllowedException("Couldn't upload damage report: The user doesn't own the requested ride");
+
+        //Test if the report was created in the ride timeframe
+        if (!ride.allowsNewDamageReport()) throw new NotAllowedException(
+                "Couldn't upload damage report: The requested ride doesn't allow new damage reports"
+        );
+
+        //Create a new damageReport object
+        DamageReport damageReport = new DamageReport(ride, imageFile.getContentType(), imageFile.getBytes() , description);
+
+        //Save the damage report
+        damageReportRepository.save(damageReport);
+
+        //Return to client
+        return new ResponseEntity<>(
+                "Damage report successfully uploaded",
+                HttpStatus.OK
+        );
     }
 }
