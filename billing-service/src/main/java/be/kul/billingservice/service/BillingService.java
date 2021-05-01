@@ -49,6 +49,8 @@ public class BillingService {
     public ResponseEntity<String> checkUserPaymentMethod(String userId) {
         boolean successfullyConfiguredPaymentMethod;
         try {
+            Stripe.apiKey = stripePublicKey;
+
             //Get the corresponding userPaymentInformation
             UserPaymentInformation userPaymentInformation = userPaymentInformationRepository.findById(userId).orElse(null);
             if (userPaymentInformation==null) throw new DoesntExistException("Couldn't check the user payment information: The user with id '" + userId + "' doesn't exist");
@@ -122,6 +124,8 @@ public class BillingService {
 
     public void processBill(long billId) {
         try {
+            Stripe.apiKey = stripePublicKey;
+
             //Get the requested bill
             Bill bill = billRepository.findById(billId).orElse(null);
             if (bill==null) throw new DoesntExistException("Couldn't get the requested bill: The bill with id '" + billId + "' doesn't exist");
