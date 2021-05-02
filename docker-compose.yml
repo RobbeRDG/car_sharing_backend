@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  service-registry:
+    container_name: service-registry
+    build:
+      context: service-registry
+      dockerfile: Dockerfile
+    image: service-registry:latest
+    ports:
+      -8761:8761
+    networks:
+      backend-services
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: api-gateway
+      dockerfile: Dockerfile
+    image: api-gateway:latest
+    ports:
+      -8080:8080
+    networks:
+      backend-services
+
+  user-service:
+    container_name: user-service
+    build:
+      context: user-service
+      dockerfile: Dockerfile
+    image: user-service:latest
+    ports:
+      -9001:9001
+    networks:
+      backend-services
+
+  car-service:
+    container_name: car-service
+    build:
+      context: car-service
+      dockerfile: Dockerfile
+    image: car-service:latest
+    ports:
+      -9002:9002
+    networks:
+      backend-services
+
+  ride-service:
+    container_name: ride-service
+    build:
+      context: ride-service
+      dockerfile: Dockerfile
+    image: ride-service:latest
+    ports:
+      -9003:9003
+    networks:
+      backend-services
+
+
+  billing-service:
+    container_name: billing-service
+    build:
+      context: billing-service
+      dockerfile: Dockerfile
+    image: billing-service:latest
+    ports:
+      -9004:9004
+    networks:
+      backend-services
+
+networks:
+  spring-cloud-network:
+    driver: bridge

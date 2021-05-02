@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: USER-SERVICE
+  datasource:
+    url: jdbc:mysql://bachelorproject-db.cxgz8qf6xo0i.eu-west-3.rds.amazonaws.com:3306/users?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: user_service
+    password: 8YC^JfCXwTLHQ9fEGF*WkwtYM
   security:
     oauth2:
       resourceserver:

@@ -12,6 +12,7 @@ import be.kul.billingservice.utils.helperObjects.BillStatusEnum;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodStatusUpdate;
+import be.kul.billingservice.utils.json.rest.ClientSecret;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.Stripe;
 import com.stripe.exception.CardException;
@@ -66,6 +67,8 @@ public class BillingService {
                             .setLimit(1L)
                             .build();
             PaymentMethodCollection paymentMethods = PaymentMethod.list(paymentMethodListParams);
+
+            log.info(paymentMethods.toJson());
 
             //Get the first payment method
             PaymentMethod paymentMethod = paymentMethods.getData().get(0);
@@ -189,7 +192,7 @@ public class BillingService {
         log.error(e.getLocalizedMessage());
     }
 
-    public ResponseEntity<String> initialiseNewUserPaymentMethod(String userId) throws StripeException {
+    public ClientSecret initialiseNewUserPaymentMethod(String userId) throws StripeException {
         //Set the stripe key
         Stripe.apiKey = stripePublicKey;
 
@@ -207,11 +210,10 @@ public class BillingService {
         params.put("customer", stripeCustomerId);
         SetupIntent setupIntent = SetupIntent.create(params);
 
+        log.info("Started card setup process for " + userId);
+
         //return the intent clientSecret to the client
-        return new ResponseEntity<>(
-                setupIntent.getClientSecret(),
-                HttpStatus.OK
-        );
+        return new ClientSecret(setupIntent.getClientSecret());
     }
 
     private UserPaymentInformation createNewUserPaymentInformation(String userId) throws StripeException {

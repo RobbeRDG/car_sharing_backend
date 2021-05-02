@@ -9,7 +9,7 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:mysql://localhost:3306/cars?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mysql://bachelorproject-db.cxgz8qf6xo0i.eu-west-3.rds.amazonaws.com:3306/cars?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: car_service
     password: E2qhvd&S%H^jRzt24Vfptq*!2
   security:
