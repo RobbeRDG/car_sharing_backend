@@ -190,6 +190,7 @@ public class BillingService {
 
     private void handleBillProcessingException(Exception e) {
         log.error(e.getLocalizedMessage());
+
     }
 
     public ClientSecret initialiseNewUserPaymentMethod(String userId) throws StripeException {
