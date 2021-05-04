@@ -15,6 +15,9 @@ services:
 
   service-registry:
     container_name: service-registry
+    build:
+      context: service-registry
+      dockerfile: Dockerfile
     image: robberdg/service-registry:latest
     ports:
       - 8761:8761
@@ -23,6 +26,9 @@ services:
 
   api-gateway:
     container_name: api-gateway
+    build:
+      context: api-gateway
+      dockerfile: Dockerfile
     image: robberdg/api-gateway:latest
     ports:
       - 8080:8080
@@ -33,6 +39,9 @@ services:
 
   user-service:
     container_name: user-service
+    build:
+      context: user-service
+      dockerfile: Dockerfile
     image: robberdg/user-service:latest
     expose:
       - 9001
@@ -43,6 +52,9 @@ services:
 
   car-service:
     container_name: car-service
+    build:
+      context: car-service
+      dockerfile: Dockerfile
     image: robberdg/car-service:latest
     expose:
       - 9002
@@ -53,6 +65,9 @@ services:
 
   ride-service:
     container_name: ride-service
+    build:
+      context: ride-service
+      dockerfile: Dockerfile
     image: robberdg/ride-service:latest
     expose:
       - 9003
@@ -64,6 +79,9 @@ services:
 
   billing-service:
     container_name: billing-service
+    build:
+      context: billing-service
+      dockerfile: Dockerfile
     image: robberdg/billing-service:latest
     expose:
       - 9004

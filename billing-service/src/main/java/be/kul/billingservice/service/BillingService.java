@@ -89,7 +89,7 @@ public class BillingService {
             amqpProducerController.sendUserPaymentMethodUpdate(userPaymentMethodStatusUpdate);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
-            throw new SomethingWentWrongException("Couldn't configure the payment method: something went wrong");
+            throw new SomethingWentWrongException("Couldn't update the payment method: something went wrong");
         }
 
         //return to client
