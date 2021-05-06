@@ -140,7 +140,7 @@ public class BillingService {
         amqpProducerController.sendBillToPaymentProcessor(savedBill.getBillId());
     }
 
-    public void processBill(long billId) throws StripeException {
+    public void processBill(long billId) throws StripeException, JsonProcessingException {
         //Get the requested bill
         Bill bill = billRepository.findById(billId).orElse(null);
         if (bill==null) throw new DoesntExistException("Couldn't process the bill: The bill with id '" + billId + "' doesn't exist");
@@ -216,6 +216,7 @@ public class BillingService {
             amqpProducerController.sendBillStatusUpdate(billStatusUpdate);
         } catch (JsonProcessingException e) {
             log.error("Failed to send bill status update: " + e.getLocalizedMessage());
+            throw e;
         }
 
         log.info("processed bill with id '" + billId + "'");
