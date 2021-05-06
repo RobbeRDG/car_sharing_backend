@@ -3,6 +3,7 @@ package be.kul.carservice.controller;
 import be.kul.carservice.entity.Car;
 import be.kul.carservice.service.CarService;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStatusUpdate;
+import be.kul.carservice.utils.json.jsonObjects.rest.EndRideConfirmation;
 import be.kul.carservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -93,7 +94,7 @@ public class RestController {
 
     @PutMapping("/cars/end-ride/{carId}")
     public @ResponseBody
-    ResponseEntity<String> endRide(
+    EndRideConfirmation endRide(
             @AuthenticationPrincipal Jwt principal,
             @PathVariable long carId
     ) throws Exception {

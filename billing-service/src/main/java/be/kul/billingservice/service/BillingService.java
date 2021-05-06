@@ -13,6 +13,7 @@ import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillIni
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodStatusUpdate;
 import be.kul.billingservice.utils.json.rest.ClientSecret;
+import be.kul.billingservice.utils.json.rest.PaymentMethodConfirmation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.Stripe;
 import com.stripe.exception.CardException;
@@ -47,7 +48,7 @@ public class BillingService {
     @Autowired
     private AmqpProducerController amqpProducerController;
 
-    public ResponseEntity<String> checkUserPaymentMethod(String userId) {
+    public PaymentMethodConfirmation checkUserPaymentMethod(String userId) {
         boolean successfullyConfiguredPaymentMethod;
         try {
             Stripe.apiKey = stripePublicKey;
@@ -94,15 +95,11 @@ public class BillingService {
 
         //return to client
         if (successfullyConfiguredPaymentMethod) {
-            return new ResponseEntity<>(
-                    "User payment information is successfully set",
-                    HttpStatus.OK
-            );
+            String confirmationMessage = "User payment information is successfully set";
+            return new PaymentMethodConfirmation(true, confirmationMessage);
         } else {
-            return new ResponseEntity<>(
-                    "User payment information has not been set",
-                    HttpStatus.CONFLICT
-            );
+            String confirmationMessage = "User payment information has not been set";
+            return new PaymentMethodConfirmation(false, confirmationMessage);
         }
     }
 

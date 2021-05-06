@@ -15,6 +15,7 @@ import be.kul.carservice.utils.json.jsonObjects.amqpMessages.payment.UserPayment
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
+import be.kul.carservice.utils.json.jsonObjects.rest.EndRideConfirmation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -324,7 +325,7 @@ public class CarService {
     }
 
     @Transactional(dontRollbackOn = {DoesntExistException.class, RequestDeniedException.class, NotAllowedException.class})
-    public ResponseEntity<String> endRide(String userId, long carId) throws JsonProcessingException {
+    public EndRideConfirmation endRide(String userId, long carId) throws JsonProcessingException {
         //Get the requested car
         Car car = carRepository.findById(carId).orElse(null);
         if (car==null) throw new DoesntExistException(
@@ -370,9 +371,7 @@ public class CarService {
         RideEnd rideEnd = new RideEnd(ride);
         amqpProducerController.sendRideEnd(rideEnd);
 
-        return new ResponseEntity<>(
-                "Successfully ended ride",
-                HttpStatus.OK);
+        return new EndRideConfirmation(true, "Successfully ended ride");
     }
 
     public void updateUserPaymentMethodStatus(UserPaymentMethodStatusUpdate userPaymentMethodStatusUpdate) {

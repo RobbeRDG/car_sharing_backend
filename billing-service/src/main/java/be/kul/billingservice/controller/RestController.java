@@ -4,6 +4,7 @@ import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.json.jsonViews.Views;
 import be.kul.billingservice.utils.json.rest.ClientSecret;
+import be.kul.billingservice.utils.json.rest.PaymentMethodConfirmation;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.exception.StripeException;
@@ -33,7 +34,7 @@ public class RestController {
 
     @GetMapping("/user-payment-method/check")
     public @ResponseBody
-    ResponseEntity<String> checkUserPaymentMethod(
+    PaymentMethodConfirmation checkUserPaymentMethod(
             @AuthenticationPrincipal Jwt principal
     ) {
         String userId = principal.getClaimAsString("sub");
