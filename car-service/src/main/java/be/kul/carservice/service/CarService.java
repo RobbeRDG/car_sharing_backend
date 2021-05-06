@@ -272,6 +272,8 @@ public class CarService {
         RideInitialisation rideInitialisation = new RideInitialisation(ride);
         amqpProducerController.sendRideInitialisation(rideInitialisation);
 
+        log.info("Started ride with id '" + updatedCar.getCurrentRide().getRideId() + "in car with id '" + updatedCar.getCarId() + "'");
+
         //Return the new car state
         return updatedCar;
     }
@@ -319,6 +321,8 @@ public class CarService {
 
         //Set the car door state
         car.setCarDoorsLocked(lock);
+
+        log.info("Locked/unlocked car with id '" + car.getCarId() + "'");
 
         //Return to client
         return carRepository.save(car);
@@ -370,6 +374,8 @@ public class CarService {
         //send the rideStateUpdate to the ride service
         RideEnd rideEnd = new RideEnd(ride);
         amqpProducerController.sendRideEnd(rideEnd);
+
+        log.info("Successfully ended ride with id '" + ride.getRideId() + "'");
 
         return new EndRideConfirmation(true, "Successfully ended ride");
     }
