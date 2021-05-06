@@ -32,6 +32,9 @@ public class AmqpConsumerController {
         long billId = Long.parseLong(billIdString);
 
         //Handle processing of the bill
-        billingService.processBill(billId);
+        try {
+            billingService.processBill(billId);
+        } catch (Exception e) {
+        }
     }
 }
