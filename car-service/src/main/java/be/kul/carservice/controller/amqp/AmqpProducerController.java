@@ -10,9 +10,11 @@ import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisa
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class AmqpProducerController {
     @Resource(name = "externalRabbitTemplate")
@@ -50,17 +53,17 @@ public class AmqpProducerController {
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("x-message-ttl", expirationTimeInMilliseconds);
 
-        externalRabbitAdmin.declareExchange(new DirectExchange(RabbitMQConfig.EXTERNAL_EXCHANGE, true, false));
+        externalRabbitAdmin.declareExchange(new TopicExchange(RabbitMQConfig.EXTERNAL_EXCHANGE, true, false));
         externalRabbitAdmin.declareQueue(new Queue(queueName, true, false, false, args));
         externalRabbitAdmin.declareBinding(
                 BindingBuilder.bind(new Queue(queueName))
-                        .to(new DirectExchange(RabbitMQConfig.EXTERNAL_EXCHANGE))
+                        .to(new TopicExchange(RabbitMQConfig.EXTERNAL_EXCHANGE))
                         .with(bindingKey));
     }
 
     public <T extends CarRequest> CarAcknowledgement sendBlockingCarRequest(T request) throws JsonProcessingException, CarOfflineException {
         //Dynamicaly generate the new queue for the selected car
-        String carIdString = request.getCarIdString();
+        String carIdString = String.valueOf(request.getCarId());
         String queueName = request.getRequestType() + "." + carIdString;
         String bindingKey = "external.cars." + request.getRequestType() + "." + carIdString;
         generateCarQueue(queueName, bindingKey);

@@ -5,23 +5,26 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Component
 public class CarRequest extends AmqpMessage {
     private String requestType;
     private long carId;
-    @Value("${spring.configurations.carRequest.expirationTimeInMilliseconds}")
     private int expirationTimeInMilliseconds;
 
-    public CarRequest(String requestType, long carId) {
+    public CarRequest(String requestType, long carId, int expirationTimeInMilliseconds) {
         super();
         this.requestType = requestType;
         this.carId = carId;
+        this.expirationTimeInMilliseconds = expirationTimeInMilliseconds;
     }
+
 
     public String getRequestType() {
         return requestType;
@@ -30,13 +33,5 @@ public class CarRequest extends AmqpMessage {
 
     public long getCarId() {
         return carId;
-    }
-
-    public int getExpirationTimeInMilliseconds() {
-        return expirationTimeInMilliseconds;
-    }
-
-    public String getCarIdString() {
-        return String.valueOf(carId);
     }
 }

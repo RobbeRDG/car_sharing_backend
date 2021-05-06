@@ -12,6 +12,7 @@ channel.queue_declare(queue='CarEndRideRequest.3')
 
 def on_request(ch, method, props, body):
     jsonResponse={
+        "messageCreationTimestamp": 
         "messageType": "CarAcknowledgement",
         "carId": 3,
         "rideId": 1,

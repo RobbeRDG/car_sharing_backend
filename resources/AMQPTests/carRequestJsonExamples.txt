@@ -1,0 +1,7 @@
+Start:  {"messageCreationTimestamp":"2021-05-06 12:44:51","requestType":"CarRideRequest","carId":3,"expirationTimeInMilliseconds":0,"rideId":9}
+
+Lock: {"messageCreationTimestamp":"2021-05-06 12:45:46","requestType":"CarLockRequest","carId":3,"expirationTimeInMilliseconds":0,"rideId":9,"lockCar":true}
+
+Unlock: {"messageCreationTimestamp":"2021-05-06 12:48:56","requestType":"CarLockRequest","carId":3,"expirationTimeInMilliseconds":0,"rideId":9,"lockCar":false}
+
+End: {"messageCreationTimestamp":"2021-05-06 12:49:25","requestType":"CarEndRideRequest","carId":3,"expirationTimeInMilliseconds":0,"rideId":9}

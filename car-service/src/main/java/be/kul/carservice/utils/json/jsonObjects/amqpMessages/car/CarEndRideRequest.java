@@ -14,8 +14,8 @@ public class CarEndRideRequest extends CarRequest{
     private static final String REQUEST_TYPE = CarEndRideRequest.class.getSimpleName();
     private long rideId;
 
-    public CarEndRideRequest(Ride ride) {
-        super(REQUEST_TYPE, ride.getCar().getCarId());
+    public CarEndRideRequest(Ride ride, int expirationTimeInMilliseconds) {
+        super(REQUEST_TYPE, ride.getCar().getCarId(), expirationTimeInMilliseconds);
         this.rideId = ride.getRideId();
     }
 }

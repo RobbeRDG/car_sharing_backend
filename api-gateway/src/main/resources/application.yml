@@ -30,7 +30,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: ${EUREKA}
+      defaultZone: ${EUREKA:http://localhost:8761/eureka/}
 
 auth0:
   audience: https://bachelorproject/api

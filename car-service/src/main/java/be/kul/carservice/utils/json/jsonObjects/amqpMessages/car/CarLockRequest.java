@@ -14,8 +14,8 @@ public class CarLockRequest extends CarRequest{
     private long rideId;
     private boolean lockCar;
 
-    public CarLockRequest(long rideId, long carId, boolean lockCar) {
-        super(REQUEST_TYPE, carId);
+    public CarLockRequest(long rideId, long carId, boolean lockCar, int expirationTimeInMilliseconds) {
+        super(REQUEST_TYPE, carId, expirationTimeInMilliseconds);
         this.rideId = rideId;
         this.lockCar = lockCar;
     }

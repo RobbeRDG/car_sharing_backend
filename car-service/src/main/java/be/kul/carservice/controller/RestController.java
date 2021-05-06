@@ -81,7 +81,7 @@ public class RestController {
         return carService.setCarToInactive(carId);
     }
 
-    @PutMapping("/cars/ride/start-ride/{carId}")
+    @PutMapping("/cars/start-ride/{carId}")
     @JsonView(Views.CarView.Ride.class)
     public @ResponseBody Car startRide(
             @AuthenticationPrincipal Jwt principal,

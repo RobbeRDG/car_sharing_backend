@@ -10,14 +10,16 @@ import be.kul.carservice.repository.ReservationRepository;
 import be.kul.carservice.repository.RideRepository;
 import be.kul.carservice.repository.UserPaymentMethodStatusRepository;
 import be.kul.carservice.utils.exceptions.*;
-import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.CarStatusUpdate;
+import be.kul.carservice.utils.json.jsonObjects.amqpMessages.car.*;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.payment.UserPaymentMethodStatusUpdate;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideEnd;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideInitialisation;
 import be.kul.carservice.utils.json.jsonObjects.amqpMessages.ride.RideWaypoint;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -30,7 +32,13 @@ import java.util.Optional;
 @Slf4j
 @org.springframework.stereotype.Service
 public class CarService {
-    private static final int RESERVATION_COOLDOWN_IN_SECONDS = 7200;
+    @Value("${spring.configurations.reservation.reservationCoolDownInSeconds}")
+    private int reservationCoolDownInSeconds;
+    @Value("${spring.configurations.carRequest.expirationTimeInMilliseconds}")
+    private int expirationTimeInMilliseconds;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private AmqpProducerController amqpProducerController;
@@ -183,7 +191,7 @@ public class CarService {
         //Calculate the duration between the two
         Duration duration = Duration.between(now, latestReservation);
 
-        return (duration.toSeconds() < RESERVATION_COOLDOWN_IN_SECONDS);
+        return (duration.toSeconds() < reservationCoolDownInSeconds);
     }
 
     public Car setCarToActive(long carId) {
@@ -229,9 +237,11 @@ public class CarService {
         //Create a new ride
         Ride ride = rideRepository.save(new Ride(userId, car));
 
-        /*
         //Send a ride request to the car and wait for response
-        CarRideRequest rideRequest = new CarRideRequest(ride);
+        CarRideRequest rideRequest = new CarRideRequest(ride, expirationTimeInMilliseconds);
+        log.info(objectMapper.writeValueAsString(rideRequest));
+
+
         CarAcknowledgement ack;
         try {
             ack = amqpProducerController.sendBlockingCarRequest(rideRequest);
@@ -246,8 +256,6 @@ public class CarService {
             throw new RequestDeniedException(
                     "Couldn't start ride: The car with id '" + carId + "' has denied the ride request: " + ack.getErrorMessage());
         }
-
-         */
 
         //Set the new car state
         car.setCurrentRide(ride);
@@ -296,16 +304,17 @@ public class CarService {
         if (!car.isRiddenBy(userId)) throw new NotAllowedException(
                 "Couldn't lock/unlock car: Cars can only be locked when the user is currently riding the car");
 
-        /*
+
         //Create a CarLockRequest and send the request to the car
-        CarLockRequest carLockRequest = new CarLockRequest(car.getCurrentRide().getRideId(), carId, true);
+        CarLockRequest carLockRequest = new CarLockRequest(car.getCurrentRide().getRideId(), carId, lock, expirationTimeInMilliseconds);
+        log.info(objectMapper.writeValueAsString(carLockRequest));
+
         CarAcknowledgement ack = amqpProducerController.sendBlockingCarRequest(carLockRequest);
 
         //Check if the acknowledgement confirms the lockrequest
         if(!ack.confirmsRequest(carLockRequest)) throw new RequestDeniedException(
                 "Couldn't lock/unlock car: The car with id '" + carId + "' has denied the lock request: " + ack.getErrorMessage());
 
-         */
 
         //Set the car door state
         car.setCarDoorsLocked(lock);
@@ -325,17 +334,17 @@ public class CarService {
         if (!car.isBeingRidden() || !car.isRiddenBy(userId)) throw new NotAllowedException(
                 "Couldn't end ride: User is not currently riding the requested car");
 
-        /*
+
         //Create a EndRideRequest and send the request to the car
-        CarEndRideRequest endRideRequest = new CarEndRideRequest(car.getCurrentRide());
+        CarEndRideRequest endRideRequest = new CarEndRideRequest(car.getCurrentRide(), expirationTimeInMilliseconds);
+        log.info(objectMapper.writeValueAsString(endRideRequest));
+
         CarAcknowledgement ack = amqpProducerController.sendBlockingCarRequest(endRideRequest);
 
 
         //Check if the acknowledgement confirms the EndRideRequest
         if(!ack.confirmsRequest(endRideRequest)) throw new RequestDeniedException(
                 "Couldn't end ride: The car with id '" + carId + "' has denied the end ride request: " + ack.getErrorMessage());
-
-         */
 
         //End the ride
         Ride ride = car.getCurrentRide();
