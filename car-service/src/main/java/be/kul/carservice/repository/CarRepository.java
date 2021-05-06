@@ -48,5 +48,18 @@ public interface CarRepository extends JpaRepository<Car, Long> {
             , nativeQuery = true)
     void unlinkCurrentReservation(@Param("reservationId") long rideIde);
 
+    @Query(value = "SELECT * " +
+            "FROM car " +
+            "INNER JOIN ride ON car.ride_id=ride.ride_id " +
+            "WHERE ride.user_id=:userId"
+            , nativeQuery = true)
+    Optional<Car> getCarBeingRiddenByUser(@Param("userId") String userId);
+
+    @Query(value = "SELECT * " +
+            "FROM car " +
+            "INNER JOIN reservation ON car.reservation_id=reservation.reservation_id " +
+            "WHERE reservation.user_id=:userId"
+            , nativeQuery = true)
+    Optional<Car> getCarReservedByUser(@Param("userId") String userId);
 }
 

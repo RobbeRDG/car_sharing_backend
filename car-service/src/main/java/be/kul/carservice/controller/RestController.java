@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping(path="/car-service")
@@ -80,7 +81,7 @@ public class RestController {
         return carService.setCarToInactive(carId);
     }
 
-    @PutMapping("/cars/start-ride/{carId}")
+    @PutMapping("/cars/ride/start-ride/{carId}")
     @JsonView(Views.CarView.Ride.class)
     public @ResponseBody Car startRide(
             @AuthenticationPrincipal Jwt principal,
@@ -120,5 +121,25 @@ public class RestController {
     ) throws Exception {
         String userId = principal.getClaimAsString("sub");
         return carService.lockCar(userId, carId, false);
+    }
+
+    @GetMapping("/cars/ride")
+    @JsonView(Views.CarView.Ride.class)
+    public @ResponseBody
+    Optional<Car> getCarBeingRiddenByUser(
+            @AuthenticationPrincipal Jwt principal
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return carService.getCarBeingRiddenByUser(userId);
+    }
+
+    @GetMapping("/cars/reservation")
+    @JsonView(Views.CarView.Reserved.class)
+    public @ResponseBody
+    Optional<Car> getCarReservedByUser(
+            @AuthenticationPrincipal Jwt principal
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return carService.getCarReservedByUser(userId);
     }
 }

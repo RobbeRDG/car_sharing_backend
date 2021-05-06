@@ -25,6 +25,7 @@ import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @org.springframework.stereotype.Service
@@ -386,5 +387,13 @@ public class CarService {
 
         //Save the new payment method status
         userPaymentMethodStatusRepository.save(userPaymentMethodStatus);
+    }
+
+    public Optional<Car> getCarBeingRiddenByUser(String userId) {
+        return carRepository.getCarBeingRiddenByUser(userId);
+    }
+
+    public Optional<Car> getCarReservedByUser(String userId) {
+        return carRepository.getCarReservedByUser(userId);
     }
 }
