@@ -21,14 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @org.springframework.stereotype.Service
@@ -406,11 +403,12 @@ public class CarService {
         userPaymentMethodStatusRepository.save(userPaymentMethodStatus);
     }
 
-    public Optional<Car> getCarBeingRiddenByUser(String userId) {
+    public Car getCarBeingRiddenByUser(String userId) {
         return carRepository.getCarBeingRiddenByUser(userId);
     }
 
-    public Optional<Car> getCarReservedByUser(String userId) {
+    public Car getCarReservedByUser(String userId) {
+        log.info(userId);
         return carRepository.getCarReservedByUser(userId);
     }
 }

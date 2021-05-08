@@ -127,7 +127,7 @@ public class RestController {
     @GetMapping("/cars/ride")
     @JsonView(Views.CarView.Ride.class)
     public @ResponseBody
-    Optional<Car> getCarBeingRiddenByUser(
+    Car getCarBeingRiddenByUser(
             @AuthenticationPrincipal Jwt principal
     ) {
         String userId = principal.getClaimAsString("sub");
@@ -137,7 +137,7 @@ public class RestController {
     @GetMapping("/cars/reservation")
     @JsonView(Views.CarView.Reserved.class)
     public @ResponseBody
-    Optional<Car> getCarReservedByUser(
+    Car getCarReservedByUser(
             @AuthenticationPrincipal Jwt principal
     ) {
         String userId = principal.getClaimAsString("sub");
