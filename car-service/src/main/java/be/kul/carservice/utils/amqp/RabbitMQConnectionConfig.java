@@ -1,5 +1,6 @@
 package be.kul.carservice.utils.amqp;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+@Slf4j
 @Configuration
 public class RabbitMQConnectionConfig {
     @Value("${spring.rabbitmq.external.host}")
@@ -56,8 +58,7 @@ public class RabbitMQConnectionConfig {
     public RabbitTemplate externalRabbitTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(externalConnectionFactory());
         rabbitTemplate.setReplyTimeout(expirationTimeInMilliseconds);
-        rabbitTemplate.setUseDirectReplyToContainer(false);
-        return new RabbitTemplate(externalConnectionFactory());
+        return rabbitTemplate;
     }
 
     @Bean(name = "externalRabbitAdmin")

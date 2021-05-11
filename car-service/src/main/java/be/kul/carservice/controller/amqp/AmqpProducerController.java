@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,11 +75,13 @@ public class AmqpProducerController {
         //Send the request and wait for response
         String response;
         try {
+            log.info("sent request " + LocalDateTime.now());
             response = (String) externalRabbitTemplate.convertSendAndReceive(
                     RabbitMQConfig.EXTERNAL_EXCHANGE,
                     bindingKey,
                     carRequestString
             );
+            log.info("timeout " + LocalDateTime.now());
             if (response==null) throw new NullPointerException();
         } catch (NullPointerException e) {
             throw new CarOfflineException("Can't lock/unlock the car: The car with id '" + carIdString + "' seems to be offline");

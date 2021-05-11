@@ -6,8 +6,8 @@ URL="amqps://iyopjwwd:ntVEoqTWlN38mXwCrhgdHUmDaOwB86N1@rat.rmq2.cloudamqp.com/iy
 params = pika.URLParameters(URL)
 connection = pika.BlockingConnection(params)
 channel = connection.channel() # start a channel
-channel.exchange_declare(exchange='serverToCars', exchange_type='direct', durable=True)
-channel.queue_declare(queue='CarRideRequest.3', durable=True, arguments={'x-message-ttl' : 30000})
+channel.exchange_declare(exchange='serverToCars', exchange_type='topic', durable=True)
+channel.queue_declare(queue='CarRideRequest.2', durable=True, arguments={'x-message-ttl' : 10000})
 
 
 def on_request(ch, method, props, body):
@@ -17,7 +17,7 @@ def on_request(ch, method, props, body):
 
     jsonResponse={
         "messageType": "CarAcknowledgement",
-        "carId": 3,
+        "carId": 2,
         "rideId": 1,
         "confirmAcknowledge": True,
         "errorMessage": ""
@@ -35,6 +35,6 @@ def on_request(ch, method, props, body):
 
 
 channel.basic_qos(prefetch_count=1)
-channel.basic_consume(queue='CarRideRequest.3', on_message_callback=on_request)
+channel.basic_consume(queue='CarRideRequest.2', on_message_callback=on_request)
 
 channel.start_consuming()

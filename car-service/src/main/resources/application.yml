@@ -28,7 +28,7 @@ spring:
       password: llcqxq_5XuJES-s0hhmiinhDfV3kVCDj
   configurations:
     carRequest:
-      expirationTimeInMilliseconds: 30000
+      expirationTimeInMilliseconds: 10000
     reservation:
       reservationCoolDownInSeconds: 7200
 
