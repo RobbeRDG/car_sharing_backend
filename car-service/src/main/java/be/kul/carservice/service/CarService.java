@@ -237,7 +237,7 @@ public class CarService {
         //Create a new ride
         Ride ride = rideRepository.save(new Ride(userId, car));
 
-        /*
+        
         //Send a ride request to the car and wait for response
         CarRideRequest rideRequest = new CarRideRequest(ride, expirationTimeInMilliseconds);
         log.info(objectMapper.writeValueAsString(rideRequest));
@@ -257,7 +257,7 @@ public class CarService {
             throw new RequestDeniedException(
                     "Couldn't start ride: The car with id '" + carId + "' has denied the ride request: " + ack.getErrorMessage());
         }
-        */
+
         //Set the new car state
         car.setCurrentRide(ride);
         car.setCarDoorsLocked(false);
@@ -339,7 +339,7 @@ public class CarService {
         if (!car.isBeingRidden() || !car.isRiddenBy(userId)) throw new NotAllowedException(
                 "Couldn't end ride: User is not currently riding the requested car");
 
-        /*
+
         //Create a EndRideRequest and send the request to the car
         CarEndRideRequest endRideRequest = new CarEndRideRequest(car.getCurrentRide(), expirationTimeInMilliseconds);
         log.info(objectMapper.writeValueAsString(endRideRequest));
@@ -350,7 +350,7 @@ public class CarService {
         //Check if the acknowledgement confirms the EndRideRequest
         if(!ack.confirmsRequest(endRideRequest)) throw new RequestDeniedException(
                 "Couldn't end ride: The car with id '" + carId + "' has denied the end ride request: " + ack.getErrorMessage());
-        */
+
         //End the ride
         Ride ride = car.getCurrentRide();
         ride.end();
