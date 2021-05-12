@@ -75,13 +75,12 @@ public class AmqpProducerController {
         //Send the request and wait for response
         String response;
         try {
-            log.info("sent request " + LocalDateTime.now());
-            response = (String) externalRabbitTemplate.convertSendAndReceive(
+            byte[] responseBytes = (byte[]) externalRabbitTemplate.convertSendAndReceive(
                     RabbitMQConfig.EXTERNAL_EXCHANGE,
                     bindingKey,
                     carRequestString
             );
-            log.info("timeout " + LocalDateTime.now());
+            response = new String(responseBytes);
             if (response==null) throw new NullPointerException();
         } catch (NullPointerException e) {
             throw new CarOfflineException("Can't lock/unlock the car: The car with id '" + carIdString + "' seems to be offline");
