@@ -70,11 +70,14 @@ public class BillingService {
                             .build();
             PaymentMethodCollection paymentMethods = PaymentMethod.list(paymentMethodListParams);
 
-            log.info(paymentMethods.toJson());
-
             //Get the first payment method
-            PaymentMethod paymentMethod = paymentMethods.getData().get(0);
-            if (paymentMethod != null) successfullyConfiguredPaymentMethod = true;
+            try {
+                paymentMethods.getData().get(0);
+                successfullyConfiguredPaymentMethod = true;
+            } catch (Exception e) {
+                log.warn("Couldn't check user payment info: no card configured");
+            }
+
 
             //If the user has pending payments, pay them now
             try {
@@ -88,7 +91,10 @@ public class BillingService {
                 successfullyConfiguredPaymentMethod = false;
             }
 
-            log.info("User payment information for user with id'" + userId + "' is successfully configured");
+
+            if (successfullyConfiguredPaymentMethod)
+                log.info("User payment information for user with id '" + userId + "' is successfully configured");
+            else log.info("User payment information for user with id '" + userId + "' is not successfully configured");
 
             //Send the new userPaymentStatus to the car service
             UserPaymentMethodStatusUpdate userPaymentMethodStatusUpdate = new UserPaymentMethodStatusUpdate(userId, successfullyConfiguredPaymentMethod);
@@ -99,7 +105,7 @@ public class BillingService {
                 String confirmationMessage = "User payment information is successfully set";
                 return new PaymentMethodConfirmation(true, confirmationMessage);
             } else {
-                String confirmationMessage = "User payment information has not been set";
+                String confirmationMessage = "User payment information has not been set, the given card may not be compatible";
                 return new PaymentMethodConfirmation(false, confirmationMessage);
             }
         } catch (Exception e) {
@@ -141,85 +147,90 @@ public class BillingService {
     }
 
     public void processBill(long billId) throws StripeException, JsonProcessingException {
-        //Get the requested bill
-        Bill bill = billRepository.findById(billId).orElse(null);
-        if (bill==null) throw new DoesntExistException("Couldn't process the bill: The bill with id '" + billId + "' doesn't exist");
-
-        //Get the corresponding userPaymentInformation
-        String userId = bill.getUserId();
-        UserPaymentInformation userPaymentInformation = userPaymentInformationRepository.findById(userId).orElse(null);
-        if (userPaymentInformation==null) throw new DoesntExistException("Couldn't process the bill: The user with id '" + userId + "' doesn't exist");
-
-        //Get the stripe customerId
-        String stripeCustomerId = userPaymentInformation.getStripeCustomerId();
-
-        //Get the billAmount in cents from the bill
-        double billTotalAmountInEur = bill.getBillTotalAmountInEur();
-        long billTotalAmountInEurCents = (long) Math.ceil(billTotalAmountInEur * 100);
-
-        //Try to process the payment
-        PaymentMethod paymentMethod = null;
         try {
-            Stripe.apiKey = stripePublicKey;
+            //Get the requested bill
+            Bill bill = billRepository.findById(billId).orElse(null);
+            if (bill==null) throw new DoesntExistException("Couldn't process the bill: The bill with id '" + billId + "' doesn't exist");
 
-            //Get the user payment methods
-            PaymentMethodListParams paymentMethodListParams =
-                    PaymentMethodListParams.builder()
-                            .setCustomer(stripeCustomerId)
-                            .setType(PaymentMethodListParams.Type.CARD)
-                            .setLimit(1L)
-                            .build();
-            PaymentMethodCollection paymentMethods = PaymentMethod.list(paymentMethodListParams);
+            //Get the corresponding userPaymentInformation
+            String userId = bill.getUserId();
+            UserPaymentInformation userPaymentInformation = userPaymentInformationRepository.findById(userId).orElse(null);
+            if (userPaymentInformation==null) throw new DoesntExistException("Couldn't process the bill: The user with id '" + userId + "' doesn't exist");
 
-            //Get the first payment methodId
-            paymentMethod = paymentMethods.getData().get(0);
-            if (paymentMethod == null)
-                throw new ValidPaymentMethodException("Couldn't process the bill: The user with id '" + userId + "'  doesn't have a valid payment method");
-            String paymentMethodId = paymentMethod.getId();
+            //Get the stripe customerId
+            String stripeCustomerId = userPaymentInformation.getStripeCustomerId();
 
-            //Bill the user payment method
-            PaymentIntentCreateParams paymentIntentParams =
-                    PaymentIntentCreateParams.builder()
-                            .setCurrency("eur")
-                            .setAmount(billTotalAmountInEurCents)
-                            .setPaymentMethod(paymentMethodId)
-                            .setCustomer(stripeCustomerId)
-                            .setConfirm(true)
-                            .setOffSession(true)
-                            .build();
-            PaymentIntent.create(paymentIntentParams);
-        } catch (ValidPaymentMethodException e) {
-            //Handle the failed payment
-            handleBillPaymentException(e, bill);
+            //Get the billAmount in cents from the bill
+            double billTotalAmountInEur = bill.getBillTotalAmountInEur();
+            long billTotalAmountInEurCents = (long) Math.ceil(billTotalAmountInEur * 100);
 
-            throw e;
-        } catch (StripeException e) {
-            //Detach the user payment method
-            paymentMethod.detach();
+            //Try to process the payment
+            PaymentMethod paymentMethod = null;
+            try {
+                Stripe.apiKey = stripePublicKey;
 
-            //Handle the failed payment
-            handleBillPaymentException(e, bill);
+                //Get the user payment methods
+                PaymentMethodListParams paymentMethodListParams =
+                        PaymentMethodListParams.builder()
+                                .setCustomer(stripeCustomerId)
+                                .setType(PaymentMethodListParams.Type.CARD)
+                                .setLimit(1L)
+                                .build();
+                PaymentMethodCollection paymentMethods = PaymentMethod.list(paymentMethodListParams);
 
+                //Get the first payment methodId
+                paymentMethod = paymentMethods.getData().get(0);
+                if (paymentMethod == null)
+                    throw new ValidPaymentMethodException("Couldn't process the bill: The user with id '" + userId + "'  doesn't have a valid payment method");
+                String paymentMethodId = paymentMethod.getId();
+
+                //Bill the user payment method
+                PaymentIntentCreateParams paymentIntentParams =
+                        PaymentIntentCreateParams.builder()
+                                .setCurrency("eur")
+                                .setAmount(billTotalAmountInEurCents)
+                                .setPaymentMethod(paymentMethodId)
+                                .setCustomer(stripeCustomerId)
+                                .setConfirm(true)
+                                .setOffSession(true)
+                                .build();
+                PaymentIntent.create(paymentIntentParams);
+            } catch (ValidPaymentMethodException e) {
+                //Handle the failed payment
+                handleBillPaymentException(e, bill);
+
+                throw e;
+            } catch (StripeException e) {
+                //Detach the user payment method
+                paymentMethod.detach();
+
+                //Handle the failed payment
+                handleBillPaymentException(e, bill);
+
+                throw e;
+            }
+
+            //Set the new bill state
+            bill.setBillStatus(BillStatusEnum.PAID);
+            bill.setLastStateUpdate(LocalDateTime.now());
+
+            //Save the bill
+            Bill savedBill = billRepository.save(bill);
+
+            //Send the ride service the billStateUpdate
+            try {
+                BillStatusUpdate billStatusUpdate = new BillStatusUpdate(savedBill);
+                amqpProducerController.sendBillStatusUpdate(billStatusUpdate);
+            } catch (JsonProcessingException e) {
+                log.error("Failed to send bill status update: " + e.getLocalizedMessage());
+                throw e;
+            }
+
+            log.info("processed bill with id '" + billId + "'");
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
             throw e;
         }
-
-        //Set the new bill state
-        bill.setBillStatus(BillStatusEnum.PAID);
-        bill.setLastStateUpdate(LocalDateTime.now());
-
-        //Save the bill
-        Bill savedBill = billRepository.save(bill);
-
-        //Send the ride service the billStateUpdate
-        try {
-            BillStatusUpdate billStatusUpdate = new BillStatusUpdate(savedBill);
-            amqpProducerController.sendBillStatusUpdate(billStatusUpdate);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to send bill status update: " + e.getLocalizedMessage());
-            throw e;
-        }
-
-        log.info("processed bill with id '" + billId + "'");
     }
 
     private void handleBillPaymentException(Exception e, Bill bill) {

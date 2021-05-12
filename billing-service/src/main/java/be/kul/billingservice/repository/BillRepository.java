@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public interface BillRepository extends JpaRepository<Bill, Long> {
     @Query(value = "SELECT * " +
             "FROM bill " +
-            "WHERE bill.user_id=:userId and bill_status=FAILED"
+            "WHERE bill.user_id=:userId and bill.bill_status='FAILED'"
             , nativeQuery = true)
     ArrayList<Bill> getUserFailedBills(@Param("userId") String userId);
 }

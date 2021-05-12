@@ -21,14 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @org.springframework.stereotype.Service
@@ -190,8 +187,10 @@ public class CarService {
         LocalDateTime latestReservation = mostRecent.getCreatedOn();
 
         //Calculate the duration between the two
-        Duration duration = Duration.between(now, latestReservation);
+        Duration duration = Duration.between(latestReservation, now);
 
+        log.info(String.valueOf(duration.toSeconds()));
+        log.info(String.valueOf(reservationCoolDownInSeconds));
         return (duration.toSeconds() < reservationCoolDownInSeconds);
     }
 
@@ -238,6 +237,7 @@ public class CarService {
         //Create a new ride
         Ride ride = rideRepository.save(new Ride(userId, car));
 
+        /*
         //Send a ride request to the car and wait for response
         CarRideRequest rideRequest = new CarRideRequest(ride, expirationTimeInMilliseconds);
         log.info(objectMapper.writeValueAsString(rideRequest));
@@ -257,7 +257,7 @@ public class CarService {
             throw new RequestDeniedException(
                     "Couldn't start ride: The car with id '" + carId + "' has denied the ride request: " + ack.getErrorMessage());
         }
-
+        */
         //Set the new car state
         car.setCurrentRide(ride);
         car.setCarDoorsLocked(false);
@@ -339,7 +339,7 @@ public class CarService {
         if (!car.isBeingRidden() || !car.isRiddenBy(userId)) throw new NotAllowedException(
                 "Couldn't end ride: User is not currently riding the requested car");
 
-
+        /*
         //Create a EndRideRequest and send the request to the car
         CarEndRideRequest endRideRequest = new CarEndRideRequest(car.getCurrentRide(), expirationTimeInMilliseconds);
         log.info(objectMapper.writeValueAsString(endRideRequest));
@@ -350,7 +350,7 @@ public class CarService {
         //Check if the acknowledgement confirms the EndRideRequest
         if(!ack.confirmsRequest(endRideRequest)) throw new RequestDeniedException(
                 "Couldn't end ride: The car with id '" + carId + "' has denied the end ride request: " + ack.getErrorMessage());
-
+        */
         //End the ride
         Ride ride = car.getCurrentRide();
         ride.end();
@@ -403,11 +403,12 @@ public class CarService {
         userPaymentMethodStatusRepository.save(userPaymentMethodStatus);
     }
 
-    public Optional<Car> getCarBeingRiddenByUser(String userId) {
+    public Car getCarBeingRiddenByUser(String userId) {
         return carRepository.getCarBeingRiddenByUser(userId);
     }
 
-    public Optional<Car> getCarReservedByUser(String userId) {
+    public Car getCarReservedByUser(String userId) {
+        log.info(userId);
         return carRepository.getCarReservedByUser(userId);
     }
 }

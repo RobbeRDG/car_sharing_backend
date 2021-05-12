@@ -6,10 +6,12 @@ import be.kul.billingservice.utils.amqp.RabbitMQConfig;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 
+@Slf4j
 public class AmqpConsumerController {
     @Autowired
     BillingService billingService;
@@ -35,6 +37,7 @@ public class AmqpConsumerController {
         try {
             billingService.processBill(billId);
         } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
         }
     }
 }
