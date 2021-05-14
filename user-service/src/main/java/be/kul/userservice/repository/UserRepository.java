@@ -1,6 +1,6 @@
-package be.kul.userservice.users.repository;
+package be.kul.userservice.repository;
 
-import be.kul.userservice.users.entity.User;
+import be.kul.userservice.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

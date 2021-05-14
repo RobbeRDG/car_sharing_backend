@@ -6,15 +6,15 @@ import be.kul.billingservice.entity.UserPaymentInformation;
 import be.kul.billingservice.repository.BillRepository;
 import be.kul.billingservice.repository.UserPaymentInformationRepository;
 import be.kul.billingservice.utils.exceptions.DoesntExistException;
-import be.kul.billingservice.utils.exceptions.ValidPaymentMethodException;
 import be.kul.billingservice.utils.exceptions.NotAllowedException;
 import be.kul.billingservice.utils.exceptions.SomethingWentWrongException;
+import be.kul.billingservice.utils.exceptions.ValidPaymentMethodException;
 import be.kul.billingservice.utils.helperObjects.BillStatusEnum;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodStatusUpdate;
-import be.kul.billingservice.utils.json.rest.ClientSecret;
-import be.kul.billingservice.utils.json.rest.PaymentMethodConfirmation;
+import be.kul.billingservice.utils.json.jsonObjects.rest.ClientSecret;
+import be.kul.billingservice.utils.json.jsonObjects.rest.PaymentMethodConfirmation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -302,6 +302,20 @@ public class BillingService {
         //Get the requested bill
         Bill bill = billRepository.findById(billId).orElse(null);
         if (bill==null) throw new DoesntExistException("Couldn't get the requested bill: The bill with id '" + billId + "' doesn't exist");
+
+        //Check if the user owns the requested bill
+        if (!bill.getUserId().equals(userId)) throw new NotAllowedException(
+                "Couldn't get the requested bill: this bill does not belong to the requesting user"
+        );
+
+        //Return to client
+        return bill;
+    }
+
+    public Bill getBillFromRide(String userId, long rideId) {
+        //Get the requested bill
+        Bill bill = billRepository.findByRideId(rideId).orElse(null);
+        if (bill==null) throw new DoesntExistException("Couldn't get the requested bill: The ride with id '" + rideId + "' doesn't have a valid bill");
 
         //Check if the user owns the requested bill
         if (!bill.getUserId().equals(userId)) throw new NotAllowedException(

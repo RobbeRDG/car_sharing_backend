@@ -317,7 +317,7 @@ public class CarService {
         //Check if the acknowledgement confirms the lockrequest
         if(!ack.confirmsRequest(carLockRequest)) throw new RequestDeniedException(
                 "Couldn't lock/unlock car: The car with id '" + carId + "' has denied the lock request: " + ack.getErrorMessage());
-        
+
 
         //Set the car door state
         car.setCarDoorsLocked(lock);

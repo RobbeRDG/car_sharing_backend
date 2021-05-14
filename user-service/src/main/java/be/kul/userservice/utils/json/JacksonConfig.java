@@ -1,4 +1,4 @@
-package be.kul.carservice.utils.json;
+package be.kul.userservice.utils.json;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -26,18 +26,18 @@ public class JacksonConfig {
         return new Jackson2ObjectMapperBuilderCustomizer() {
             @Override
             public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-                jacksonObjectMapperBuilder.modules(new JavaTimeModule())
-                        .simpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                        .serializers(
-                                new LocalDateSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                                new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .deserializers(
-                                new LocalDateDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                                new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .modules(
-                                new JavaTimeModule(),
-                                new JtsModule());
+                        jacksonObjectMapperBuilder.modules(new JavaTimeModule())
+                            .simpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                            .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                            .serializers(
+                                    new LocalDateSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                                    new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                            .deserializers(
+                                    new LocalDateDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                                    new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                            .modules(
+                                    new JavaTimeModule(),
+                                    new JtsModule());
             }
         };
     }

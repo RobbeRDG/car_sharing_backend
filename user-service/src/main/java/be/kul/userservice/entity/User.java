@@ -1,4 +1,4 @@
-package be.kul.userservice.users.entity;
+package be.kul.userservice.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,5 @@
 package be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing;
 
-import be.kul.billingservice.utils.helperObjects.UserPaymentMethodStatusEnum;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.AmqpMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

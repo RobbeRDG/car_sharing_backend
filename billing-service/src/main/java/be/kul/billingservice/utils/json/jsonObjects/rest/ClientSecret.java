@@ -1,4 +1,4 @@
-package be.kul.billingservice.utils.json.rest;
+package be.kul.billingservice.utils.json.jsonObjects.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PaymentMethodConfirmation {
-    private boolean successfullySet;
-    private String message;
+public class ClientSecret {
+    private String clientSecretString;
 }

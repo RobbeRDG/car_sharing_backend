@@ -1,15 +1,13 @@
-package be.kul.userservice.users.service;
+package be.kul.userservice.service;
 
-import be.kul.userservice.users.entity.User;
-import be.kul.userservice.users.repository.UserRepository;
+import be.kul.userservice.entity.User;
+import be.kul.userservice.repository.UserRepository;
 import be.kul.userservice.utils.exceptions.AlreadyExistsException;
 import be.kul.userservice.utils.exceptions.DoesntExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserService {

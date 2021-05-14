@@ -1,6 +1,5 @@
 package be.kul.billingservice.controller.amqp;
 
-import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.amqp.RabbitMQConfig;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillStatusUpdate;

@@ -3,7 +3,6 @@ package be.kul.billingservice.entity;
 import be.kul.billingservice.utils.helperObjects.BillStatusEnum;
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillInitialisation;
 import be.kul.billingservice.utils.json.jsonViews.Views;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +11,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

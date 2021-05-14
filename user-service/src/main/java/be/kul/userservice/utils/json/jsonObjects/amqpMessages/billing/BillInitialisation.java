@@ -1,4 +1,4 @@
-package be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing;
+package be.kul.userservice.utils.json.jsonObjects.amqpMessages.billing;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

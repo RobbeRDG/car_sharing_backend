@@ -1,6 +1,6 @@
-package be.kul.carservice.utils.exceptions;
+package be.kul.userservice.utils.exceptions;
 
-import be.kul.carservice.utils.json.jsonObjects.rest.ErrorMessage;
+import be.kul.userservice.utils.json.jsonObjects.rest.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,11 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             AlreadyExistsException.class,
-            DoesntExistException.class,
-            NotAvailableException.class,
-            ReservationCooldownException.class,
-            CarOfflineException.class,
-            NotAllowedException.class
+            DoesntExistException.class
     })
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getLocalizedMessage();
@@ -66,4 +62,3 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
         );
     }
 }
-

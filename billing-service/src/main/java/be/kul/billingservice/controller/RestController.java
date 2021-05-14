@@ -2,20 +2,18 @@ package be.kul.billingservice.controller;
 
 import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
+import be.kul.billingservice.utils.json.jsonObjects.rest.ClientSecret;
+import be.kul.billingservice.utils.json.jsonObjects.rest.PaymentMethodConfirmation;
 import be.kul.billingservice.utils.json.jsonViews.Views;
-import be.kul.billingservice.utils.json.rest.ClientSecret;
-import be.kul.billingservice.utils.json.rest.PaymentMethodConfirmation;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
-
-import java.sql.Date;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping(path="/billing-service")
@@ -61,5 +59,27 @@ public class RestController {
     ) {
         String userId = principal.getClaimAsString("sub");
         return billingService.getBill(userId, billId);
+    }
+
+    @GetMapping("/bills/ride/{rideId}")
+    @JsonView(Views.BillView.Basic.class)
+    public @ResponseBody
+    Bill getBillFromRide(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long rideId
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return billingService.getBillFromRide(userId, rideId);
+    }
+
+    @GetMapping("/bills/ride/detail/{rideId}")
+    @JsonView(Views.BillView.Detail.class)
+    public @ResponseBody
+    Bill getBillDetailFromRide(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable long rideId
+    ) {
+        String userId = principal.getClaimAsString("sub");
+        return billingService.getBillFromRide(userId, rideId);
     }
 }

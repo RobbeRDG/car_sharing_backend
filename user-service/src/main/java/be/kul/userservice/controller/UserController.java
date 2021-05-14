@@ -1,13 +1,11 @@
-package be.kul.userservice.users.controller;
+package be.kul.userservice.controller;
 
-import be.kul.userservice.users.entity.User;
-import be.kul.userservice.users.service.UserService;
+import be.kul.userservice.entity.User;
+import be.kul.userservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path="/user-service")

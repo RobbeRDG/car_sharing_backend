@@ -1,14 +1,14 @@
-package be.kul.billingservice.utils.json.rest;
+package be.kul.userservice.utils.json.jsonObjects.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-public class ClientSecret {
-    private String clientSecretString;
+public class ErrorMessage {
+    private String errorMessage;
 }
