@@ -307,7 +307,7 @@ public class CarService {
         if (!car.isRiddenBy(userId)) throw new NotAllowedException(
                 "Couldn't lock/unlock car: Cars can only be locked when the user is currently riding the car");
 
-        /*
+
         //Create a CarLockRequest and send the request to the car
         CarLockRequest carLockRequest = new CarLockRequest(car.getCurrentRide().getRideId(), carId, lock, expirationTimeInMilliseconds);
         log.info(objectMapper.writeValueAsString(carLockRequest));
@@ -317,7 +317,7 @@ public class CarService {
         //Check if the acknowledgement confirms the lockrequest
         if(!ack.confirmsRequest(carLockRequest)) throw new RequestDeniedException(
                 "Couldn't lock/unlock car: The car with id '" + carId + "' has denied the lock request: " + ack.getErrorMessage());
-        */
+        
 
         //Set the car door state
         car.setCarDoorsLocked(lock);
