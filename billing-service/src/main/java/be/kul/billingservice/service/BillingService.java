@@ -15,6 +15,7 @@ import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.BillSta
 import be.kul.billingservice.utils.json.jsonObjects.amqpMessages.billing.UserPaymentMethodStatusUpdate;
 import be.kul.billingservice.utils.json.jsonObjects.rest.ClientSecret;
 import be.kul.billingservice.utils.json.jsonObjects.rest.PaymentMethodConfirmation;
+import be.kul.billingservice.utils.json.jsonObjects.rest.UserPaymentCardInformation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -70,14 +71,9 @@ public class BillingService {
                             .build();
             PaymentMethodCollection paymentMethods = PaymentMethod.list(paymentMethodListParams);
 
-            //Get the first payment method
-            try {
-                paymentMethods.getData().get(0);
-                successfullyConfiguredPaymentMethod = true;
-            } catch (Exception e) {
-                log.warn("Couldn't check user payment info: no card configured");
-            }
-
+            //Get the first payment methodId
+            if (paymentMethods.getData().isEmpty()) successfullyConfiguredPaymentMethod = false;
+            else successfullyConfiguredPaymentMethod = true;
 
             //If the user has pending payments, pay them now
             try {
@@ -164,11 +160,10 @@ public class BillingService {
             double billTotalAmountInEur = bill.getBillTotalAmountInEur();
             long billTotalAmountInEurCents = (long) Math.ceil(billTotalAmountInEur * 100);
 
-            //Try to process the payment
-            PaymentMethod paymentMethod = null;
+            //Get the customer payment options
+            Stripe.apiKey = stripePublicKey;
+            PaymentMethodCollection paymentMethods;
             try {
-                Stripe.apiKey = stripePublicKey;
-
                 //Get the user payment methods
                 PaymentMethodListParams paymentMethodListParams =
                         PaymentMethodListParams.builder()
@@ -176,14 +171,24 @@ public class BillingService {
                                 .setType(PaymentMethodListParams.Type.CARD)
                                 .setLimit(1L)
                                 .build();
-                PaymentMethodCollection paymentMethods = PaymentMethod.list(paymentMethodListParams);
+                paymentMethods = PaymentMethod.list(paymentMethodListParams);
+            } catch (StripeException e) {
+                handleBillPaymentException(e, bill);
+                throw e;
+            }
 
-                //Get the first payment methodId
-                paymentMethod = paymentMethods.getData().get(0);
-                if (paymentMethod == null)
-                    throw new ValidPaymentMethodException("Couldn't process the bill: The user with id '" + userId + "'  doesn't have a valid payment method");
-                String paymentMethodId = paymentMethod.getId();
+            //Get the first payment methodId
+            if (paymentMethods.getData().isEmpty()) {
+                ValidPaymentMethodException e = new ValidPaymentMethodException(
+                        "Couldn't process the bill: The user with id '" + userId + "'  doesn't have a valid payment method"
+                );
+                handleBillPaymentException(e, bill);
+                throw e;
+            }
+            PaymentMethod paymentMethod = paymentMethods.getData().get(0);
+            String paymentMethodId = paymentMethod.getId();
 
+            try {
                 //Bill the user payment method
                 PaymentIntentCreateParams paymentIntentParams =
                         PaymentIntentCreateParams.builder()
@@ -195,13 +200,8 @@ public class BillingService {
                                 .setOffSession(true)
                                 .build();
                 PaymentIntent.create(paymentIntentParams);
-            } catch (ValidPaymentMethodException e) {
-                //Handle the failed payment
-                handleBillPaymentException(e, bill);
-
-                throw e;
             } catch (StripeException e) {
-                //Detach the user payment method
+                //Detach the non-working user payment method
                 paymentMethod.detach();
 
                 //Handle the failed payment
@@ -272,15 +272,52 @@ public class BillingService {
         //Get the stripeCustomerId from the userPaymentInformation
         String stripeCustomerId = userPaymentInformation.getStripeCustomerId();
 
+        //Delete all the current payment methods
+        deleteAllPaymentMethods(stripeCustomerId);
+
         //Create a stripe setupintent
+        String[] paymentMethodTypes = {"card"};
         Map<String, Object> params = new HashMap<>();
         params.put("customer", stripeCustomerId);
+        params.put("usage", "off_session");
+        params.put("payment_method_types", paymentMethodTypes);
+
         SetupIntent setupIntent = SetupIntent.create(params);
 
         log.info("Started card setup process for " + userId);
 
         //return the intent clientSecret to the client
         return new ClientSecret(setupIntent.getClientSecret());
+    }
+
+    private void deleteAllPaymentMethods(String stripeCustomerId) {
+        //Get the Stripe customer payment options
+        PaymentMethodCollection paymentMethods;
+        try {
+            //Get the user payment methods
+            PaymentMethodListParams paymentMethodListParams =
+                    PaymentMethodListParams.builder()
+                            .setCustomer(stripeCustomerId)
+                            .setType(PaymentMethodListParams.Type.CARD)
+                            .setLimit(1L)
+                            .build();
+            paymentMethods = PaymentMethod.list(paymentMethodListParams);
+        } catch (StripeException e) {
+            throw new SomethingWentWrongException(
+                    "Couldn't delete payment methods: Something went wrong trying to get the user payment methods"
+            );
+        }
+
+        for (PaymentMethod paymentMethod: paymentMethods.getData()) {
+            try {
+                paymentMethod.detach();
+            } catch (StripeException e) {
+                throw new SomethingWentWrongException(
+                        "Couldn't delete payment methods: Something went wrong trying to delete the user payment methods"
+                );
+            }
+        }
+
     }
 
     private UserPaymentInformation createNewUserPaymentInformation(String userId) throws StripeException {
@@ -296,6 +333,49 @@ public class BillingService {
         UserPaymentInformation userPaymentInformation = new UserPaymentInformation(userId,stripeCustomerID);
 
         return userPaymentInformationRepository.save(userPaymentInformation);
+    }
+
+    public UserPaymentCardInformation getCurrentUserPaymentCard(String userId) {
+        //Set the stripe key
+        Stripe.apiKey = stripePublicKey;
+
+        //Get the userPaymentInformation
+        UserPaymentInformation userPaymentInformation = userPaymentInformationRepository.findById(userId).orElse(null);
+        if (userPaymentInformation == null) return new UserPaymentCardInformation(false, "");
+
+        //Get the stripe customerId
+        String stripeCustomerId = userPaymentInformation.getStripeCustomerId();
+
+        //Get the customer payment options
+        PaymentMethodCollection paymentMethods;
+        try {
+            //Get the user payment methods
+            PaymentMethodListParams paymentMethodListParams =
+                    PaymentMethodListParams.builder()
+                            .setCustomer(stripeCustomerId)
+                            .setType(PaymentMethodListParams.Type.CARD)
+                            .setLimit(1L)
+                            .build();
+            paymentMethods = PaymentMethod.list(paymentMethodListParams);
+        } catch (StripeException e) {
+            throw new SomethingWentWrongException(
+                    "Couldn't get current payment card: Something went wrong"
+            );
+        }
+
+        //Get the current paymentMethod
+        if (paymentMethods.getData().isEmpty()) return new UserPaymentCardInformation(false, "");
+        PaymentMethod currentPaymentMethod = paymentMethods.getData().get(0);
+
+
+        //Get the last 4 digits of the card
+        String last4Digits = currentPaymentMethod.getCard().getLast4();
+
+        //Make the card information string
+        String fullCardString = "************" + last4Digits;
+
+        //Return to client
+        return new UserPaymentCardInformation(true, fullCardString);
     }
 
     public Bill getBill(String userId, long billId) {
@@ -325,4 +405,6 @@ public class BillingService {
         //Return to client
         return bill;
     }
+
+
 }

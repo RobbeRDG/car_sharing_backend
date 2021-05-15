@@ -4,6 +4,7 @@ import be.kul.billingservice.entity.Bill;
 import be.kul.billingservice.service.BillingService;
 import be.kul.billingservice.utils.json.jsonObjects.rest.ClientSecret;
 import be.kul.billingservice.utils.json.jsonObjects.rest.PaymentMethodConfirmation;
+import be.kul.billingservice.utils.json.jsonObjects.rest.UserPaymentCardInformation;
 import be.kul.billingservice.utils.json.jsonViews.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.stripe.exception.StripeException;
@@ -28,6 +29,15 @@ public class RestController {
     ) throws StripeException {
         String userId = principal.getClaimAsString("sub");
         return billingService.initialiseNewUserPaymentMethod(userId);
+    }
+
+    @GetMapping("/user-payment-method/current")
+    public @ResponseBody
+    UserPaymentCardInformation getCurrentUserPaymentMethod(
+            @AuthenticationPrincipal Jwt principal
+    ) throws StripeException {
+        String userId = principal.getClaimAsString("sub");
+        return billingService.getCurrentUserPaymentCard(userId);
     }
 
     @GetMapping("/user-payment-method/check")
