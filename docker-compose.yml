@@ -2,7 +2,6 @@ version: "3.8"
 
 services:
   service-registry:
-    container_name: service-registry
     image: robberdg/service-registry:latest
     ports:
       - 8761:8761
@@ -10,7 +9,6 @@ services:
       - backend-services
 
   api-gateway:
-    container_name: api-gateway
     image: robberdg/api-gateway:latest
     ports:
       - 8080:8080
@@ -20,7 +18,6 @@ services:
       - EUREKA=http://service-registry:8761/eureka
 
   user-service:
-    container_name: user-service
     image: robberdg/user-service:latest
     expose:
       - 9001
@@ -30,7 +27,6 @@ services:
       - EUREKA=http://service-registry:8761/eureka
 
   car-service:
-    container_name: car-service
     image: robberdg/car-service:latest
     expose:
       - 9002
@@ -40,7 +36,6 @@ services:
       - EUREKA=http://service-registry:8761/eureka
 
   ride-service:
-    container_name: ride-service
     image: robberdg/ride-service:latest
     expose:
       - 9003
@@ -51,7 +46,6 @@ services:
 
 
   billing-service:
-    container_name: billing-service
     image: robberdg/billing-service:latest
     expose:
       - 9004
