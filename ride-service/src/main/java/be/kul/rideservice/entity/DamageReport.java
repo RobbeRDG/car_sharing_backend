@@ -17,12 +17,12 @@ import java.time.LocalDateTime;
 @Entity
 public class DamageReport {
     @Id
-    @GeneratedValue(generator = "carImage-sequence-generator")
+    @GeneratedValue(generator = "damage-report-sequence-generator")
     @GenericGenerator(
-            name = "carImage-sequence-generator",
+            name = "damage-report-sequence-generator",
             strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
-                    @org.hibernate.annotations.Parameter(name = "sequence_name", value = "carImage_sequence"),
+                    @org.hibernate.annotations.Parameter(name = "sequence_name", value = "damage_report_sequence"),
                     @org.hibernate.annotations.Parameter(name = "initial_value", value = "1"),
                     @org.hibernate.annotations.Parameter(name = "increment_size", value = "1")
             }
